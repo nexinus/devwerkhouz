@@ -1,0 +1,33 @@
+<div class="max-w-2xl mx-auto py-8">
+  <h1 class="text-2xl font-semibold mb-4">AI Prompt Generator</h1>
+  <% if @error.present? %>
+    <div class="mb-4 p-3 bg-red-100 text-red-800 rounded"><%= @error %></div>
+  <% end %>
+  <%= form_with url: prompt_path, method: :post, local: true do |f| %>
+    <div>
+      <%= f.label :idea, "Describe your idea", class: "block mb-1" %>
+      <%= f.text_area :idea, rows: 5, class: "w-full p-2 border rounded" %>
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <%= f.label :category, class: "block mb-1" %>
+        <%= f.select :category, options_for_select(["Writing","Business","Creative","Education"]), {}, class: "w-full p-2 border rounded" %>
+      </div>
+      <div>
+        <%= f.label :tone, class: "block mb-1" %>
+        <%= f.select :tone, options_for_select(["Formal","Casual","Persuasive"]), {}, class: "w-full p-2 border rounded" %>
+      </div>
+      <div>
+        <%= f.label :format, class: "block mb-1" %>
+        <%= f.select :format, options_for_select(["Paragraph","List","Bullets"]), {}, class: "w-full p-2 border rounded" %>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <%= f.submit "Generate Prompt", class: "px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" %>
+    </div>
+  <% end %>
+</div>
+
+
