@@ -17,5 +17,5 @@ Rails.application.routes.draw do
   get "/terms", to: "pages#terms"
   get "/impressum", to: "pages#impressum"
 
-  resource :prompt, only: [:new, :create], controller: "prompts"
+  resource :prompt, only: [ :new, :create ], controller: "prompts"
 end

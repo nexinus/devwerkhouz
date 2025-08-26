@@ -38,5 +38,3 @@ class PromptsController < ApplicationController
     render :new, status: :service_unavailable
   end
 end
-
-
