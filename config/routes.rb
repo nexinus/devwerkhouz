@@ -12,5 +12,10 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "prompts#new"
 
+  # Static pages
+  get "/privacy", to: "pages#privacy"
+  get "/terms", to: "pages#terms"
+  get "/impressum", to: "pages#impressum"
+
   resource :prompt, only: [:new, :create], controller: "prompts"
 end
