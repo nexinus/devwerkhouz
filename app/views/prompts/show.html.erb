@@ -1,19 +1,27 @@
 <div class="max-w-2xl mx-auto py-8">
-  <h2 class="text-xl font-semibold mb-4">Generated Prompt</h2>
+  <h2 class="text-xl font-semibold mb-2">Generated Prompt</h2>
 
-  <% if @error.present? %>
-    <div class="mb-4 p-3 rounded bg-red-100 text-red-800"><%= @error %></div>
+  <% if @generated_prompt.present? %>
+    <pre class="p-4 bg-gray-100 rounded whitespace-pre-wrap"><%= @generated_prompt %></pre>
+
+    <div class="mt-4">
+      <button id="copyBtn" class="px-3 py-2 rounded bg-green-600 text-white">Copy</button>
+      <%= link_to "Back / Edit", new_prompt_path, class: "ml-3 text-sm underline" %>
+    </div>
+
+    <script>
+      document.getElementById("copyBtn")?.addEventListener("click", function() {
+        navigator.clipboard.writeText(<%= j @generated_prompt.to_json %>)
+          .then(() => { this.innerText = "Copied"; setTimeout(()=> this.innerText = "Copy", 1500); });
+      });
+    </script>
+  <% elsif @error.present? %>
+    <div class="p-4 bg-red-100 text-red-800 rounded"><%= @error %></div>
+    <div class="mt-2"><%= link_to "Back / Edit", new_prompt_path %></div>
+  <% else %>
+    <div class="p-4 text-gray-600">No prompt generated. Try again.</div>
+    <div class="mt-2"><%= link_to "Back", new_prompt_path %></div>
   <% end %>
-
-  <div>
-    <label class="block mb-2 text-sm text-gray-600">Copy-ready prompt</label>
-    <textarea readonly rows="10" class="w-full p-3 border rounded font-mono bg-gray-50"><%= @generated_prompt %></textarea>
-  </div>
-
-  <div class="mt-4 flex gap-2">
-    <button class="px-3 py-2 bg-gray-800 text-white rounded" onclick="navigator.clipboard.writeText(`<%= j @generated_prompt %>`)">Copy</button>
-    <%= link_to "Back / Edit", new_prompt_path(prompt: params[:prompt]), class: "px-3 py-2 border rounded" %>
-  </div>
 </div>
 
 
