@@ -33,6 +33,13 @@ class PromptsController < ApplicationController
     )
 
     @generated_prompt = response.dig("choices", 0, "message", "content")
+    # keep the original user inputs so Back/Edit can repopulate the form
+    @previous_input = {
+      idea: user_input,
+      category: category,
+      tone: tone,
+      format: format
+    }
     render :show
   rescue => e
     @error = "AI service error: #{e.message}"

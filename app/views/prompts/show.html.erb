@@ -2,22 +2,39 @@
   <h2 class="text-xl font-semibold mb-2">Generated Prompt</h2>
 
   <% if @generated_prompt.present? %>
-    <pre class="p-4 bg-gray-100 rounded whitespace-pre-wrap"><%= @generated_prompt %></pre>
+    <pre id="generatedPromptPre" class="p-4 bg-gray-100 rounded whitespace-pre-wrap"><%= @generated_prompt %></pre>
 
     <div class="mt-4">
       <button id="copyBtn" class="px-3 py-2 rounded bg-green-600 text-white">Copy</button>
-      <%= link_to "Back / Edit", new_prompt_path, class: "ml-3 text-sm underline" %>
+      <%= link_to "Back / Edit", new_prompt_path(prompt: @previous_input), class: "ml-3 text-sm underline" %>
     </div>
 
     <script>
-      document.getElementById("copyBtn")?.addEventListener("click", function() {
-        navigator.clipboard.writeText(<%= j @generated_prompt.to_json %>)
-          .then(() => { this.innerText = "Copied"; setTimeout(()=> this.innerText = "Copy", 1500); });
-      });
+      // Ensure copy button works after Turbo navigation and normal loads
+      function setupPromptUI() {
+        const copyBtn = document.getElementById("copyBtn");
+        if (!copyBtn) return;
+        // remove existing to avoid duplicate handlers
+        copyBtn.replaceWith(copyBtn.cloneNode(true));
+        const btn = document.getElementById("copyBtn");
+        btn.addEventListener("click", function() {
+          const pre = document.getElementById("generatedPromptPre");
+          if (!pre) { alert("Nothing to copy"); return; }
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            btn.innerText = "Copied";
+            setTimeout(() => btn.innerText = "Copy", 1500);
+          }).catch(() => {
+            alert("Copy failed — please select the text and copy manually.");
+          });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", setupPromptUI);
+      document.addEventListener("turbo:load", setupPromptUI);
     </script>
   <% elsif @error.present? %>
     <div class="p-4 bg-red-100 text-red-800 rounded"><%= @error %></div>
-    <div class="mt-2"><%= link_to "Back / Edit", new_prompt_path %></div>
+    <div class="mt-2"><%= link_to "Back / Edit", new_prompt_path(prompt: @previous_input) %></div>
   <% else %>
     <div class="p-4 text-gray-600">No prompt generated. Try again.</div>
     <div class="mt-2"><%= link_to "Back", new_prompt_path %></div>
