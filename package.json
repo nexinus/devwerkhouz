@@ -1,0 +1,13 @@
+{
+  "name": "devwerkhouz",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tailwindcss -i ./app/assets/tailwind/application.css -o ./app/assets/builds/tailwind.css --minify"
+  },
+  "dependencies": {
+    "tailwindcss": "^4.1.12",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.0.0"
+  }
+}
