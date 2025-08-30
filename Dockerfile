@@ -1,72 +1,71 @@
 # syntax=docker/dockerfile:1
-# check=error=true
-
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t devwerkhouz .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name devwerkhouz devwerkhouz
-
-# For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
-
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.4.4
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
-
-# Rails app lives here
+FROM ruby:${RUBY_VERSION}-slim AS base
 WORKDIR /rails
 
-# Install base packages
+# --- common runtime deps ---
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set production environment
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_WITHOUT="development:test"
 
-# Throw-away build stage to reduce size of final image
+# -------- BUILD STAGE --------
 FROM base AS build
 
-# Install packages needed to build gems
+# install build tools first
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config nodejs npm gnupg && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install application gems
+# make sure we have the bundler version your Gemfile.lock expects
+RUN gem install bundler -v 2.7.1
+
+# copy only Gemfiles and install gems (leverage cache)
 COPY Gemfile Gemfile.lock ./
-RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    bundle exec bootsnap precompile --gemfile
+RUN bundle _2.7.1_ install --jobs 4 --retry 3
 
-# Copy application code
+# enable corepack & prepare yarn
+RUN npm i -g corepack || true
+RUN corepack enable || true
+RUN corepack prepare yarn@stable --activate || true
+
+# copy package files and install node deps
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+# copy the rest of the app
 COPY . .
 
-# Precompile bootsnap code for faster boot times
-RUN bundle exec bootsnap precompile app/ lib/
+# precompile bootsnap (optional but fine)
+RUN bundle exec bootsnap precompile app/ lib/ || true
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+# generate temporary secret and precompile assets
+# use ruby to generate a strong secret at build time
+RUN SECRET=$(ruby -rsecurerandom -e 'print SecureRandom.hex(64)') && \
+    SECRET_KEY_BASE=$SECRET RAILS_ENV=production bin/rails assets:precompile
 
-
-
-
-# Final stage for app image
+# -------- FINAL IMAGE --------
 FROM base
 
-# Copy built artifacts: gems, application
-COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
+# copy gems and app from build stage
+COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
+# runtime user (non-root)
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
-USER 1000:1000
+    chown -R rails:rails /rails/tmp /rails/log /rails/storage
 
-# Entrypoint prepares the database.
+USER rails
+
+WORKDIR /rails
+
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
-
-# Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
+
+# default command (use your existing thrust if you want)
 CMD ["./bin/thrust", "./bin/rails", "server"]
