@@ -1,5 +1,21 @@
-<header class="bg-white border-b">
-  <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="/" class="text-lg font-bold">DevWerkHouz</a>
+<header class="py-4">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <%= link_to root_path, class: "flex items-center gap-3" do %>
+        <div class="h-8 w-8 bg-green-600 text-white rounded flex items-center justify-center font-bold">D</div>
+        <span class="text-lg font-semibold text-gray-900">devwerkhouz</span>
+      <% end %>
+    </div>
+
+    <nav class="flex items-center gap-4">
+      <% if user_signed_in? %>
+        <span class="text-sm text-gray-700">Hi, <%= current_user.name %></span>
+        <%= link_to "Your prompts", prompts_path, class: "px-3 py-1 rounded text-sm bg-gray-100 hover:bg-gray-50" %>
+        <%= button_to "Sign out", logout_path, method: :delete, class: "px-3 py-1 text-sm rounded bg-red-50 text-red-700" %>
+      <% else %>
+        <%= link_to "Sign in", login_path, class: "text-sm text-gray-700 px-3 py-1 rounded hover:bg-gray-50" %>
+        <%= link_to "Sign up", signup_path, class: "text-sm text-white px-3 py-1 rounded bg-green-600 hover:bg-green-700" %>
+      <% end %>
+    </nav>
   </div>
 </header>
