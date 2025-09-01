@@ -1,0 +1,46 @@
+<div id="cookie-consent" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:bottom-8 z-50 max-w-xl bg-white border rounded shadow p-4 flex items-start gap-3" style="display: none;">
+    <div class="flex-1">
+        <p class="text-sm">We use cookies and similar technologies to improve your experience. Some cookies are essential. By clicking "Accept" you consent to non-essential cookies used for analytics and improvements. <a href="/privacy">Read more</a>.</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <button id="cookie-accept" class="px-3 py-2 bg-green-600 text-white rounded">Accept</button>
+        <button id="cookie-decline" class="px-3 py-2 bg-gray-200 rounded">Decline</button>
+    </div>
+</div>
+
+
+<script>
+(function() {
+    const COOKIE_NAME = 'devwerkhouz_cookie_consent';
+    function readCookie() {
+        try { return JSON.parse(localStorage.getItem(COOKIE_NAME)); } catch(e){return null}
+    }
+    function setChoice(val){ localStorage.setItem(COOKIE_NAME, JSON.stringify(val)); }
+
+
+    document.addEventListener('turbo:load', initConsent);
+    document.addEventListener('DOMContentLoaded', initConsent);
+
+
+    function initConsent(){
+        const el = document.getElementById('cookie-consent');
+        if(!el) return;
+        const existing = readCookie();
+        if(existing){ el.style.display = 'none'; return; }
+        el.style.display = 'flex';
+
+
+        document.getElementById('cookie-accept').addEventListener('click', function(){
+            setChoice({accepted: true, ts: Date.now()});
+            el.style.display = 'none';
+            // Optionally trigger analytics init here
+        });
+
+
+        document.getElementById('cookie-decline').addEventListener('click', function(){
+            setChoice({accepted: false, ts: Date.now()});
+            el.style.display = 'none';
+        });
+    }
+})();
+</script>
