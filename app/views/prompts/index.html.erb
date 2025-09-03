@@ -1,0 +1,15 @@
+<h1 class="text-xl font-semibold mb-4">Prompt history</h1>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <aside class="lg:col-span-1">
+    <div id="sidebar_history" class="space-y-2">
+      <%= render partial: "prompts/sidebar_item", collection: @prompts, as: :prompt %>
+    </div>
+  </aside>
+
+  <main class="lg:col-span-2">
+    <div id="prompt_show">
+      <p class="text-sm text-gray-500">Create a prompt to see the generated result here.</p>
+    </div>
+  </main>
+</div>

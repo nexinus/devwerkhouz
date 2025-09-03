@@ -1,0 +1,8 @@
+<%= turbo_frame_tag dom_id(prompt) do %>
+  <div class="p-2 rounded hover:bg-gray-50">
+    <%= link_to prompt_path(prompt), data: { turbo_frame: "prompt_show" }, class: "flex justify-between items-center" do %>
+      <div class="truncate text-sm"><%= prompt.idea.to_s.truncate(80) %></div>
+      <div class="text-xs text-gray-400 ml-2 hidden md:inline"><%= prompt.created_at.strftime("%b %-d") %></div>
+    <% end %>
+  </div>
+<% end %>

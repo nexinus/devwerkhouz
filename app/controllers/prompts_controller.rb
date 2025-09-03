@@ -1,18 +1,16 @@
 class PromptsController < ApplicationController
   before_action :authenticate_user!
 
+  def index
+    @prompts = current_user.prompts.order(created_at: :desc).limit(50)
+  end
+
   def new
-    # allow prefill from params or previously saved inputs
     @prompt = Prompt.new(idea: params.dig(:prompt, :idea) || params[:idea])
   end
 
   def create
-    # accept either nested params[:prompt][:idea] OR top-level params[:idea]
-    # user_input = params.dig(:prompt, :idea) || params[:idea]
-    # category   = params.dig(:prompt, :category) || params[:category]
-    # tone       = params.dig(:prompt, :tone) || params[:tone]
-    # format     = params.dig(:prompt, :format) || params[:format]
-    user_input = params.dig(:prompt, :idea)
+    idea = params.dig(:prompt, :idea)
     category = params.dig(:prompt, :category)
     tone = params.dig(:prompt, :tone)
     format = params.dig(:prompt, :format)
@@ -20,7 +18,7 @@ class PromptsController < ApplicationController
     system_prompt = <<~PROMPT
       You are a professional prompt engineer. Create a single concise and clear prompt for a large language model based on the user's idea below.
 
-      User idea: #{user_input}
+      User idea: #{idea}
       Category: #{category}
       Tone: #{tone}
       Desired format: #{format}
@@ -40,44 +38,55 @@ class PromptsController < ApplicationController
       }
     )
 
-    @generated_prompt = response.dig("choices", 0, "message", "content")
+    # set local variable and instance var for templates
+    generated = response.dig("choices", 0, "message", "content")&.strip
+    @generated_prompt = generated
 
-    # save prompt for current_user
-    @prompt = current_user.prompts.create(
-      idea: user_input,
+    # save prompt for current_user (user is required per your model)
+    @prompt = current_user.prompts.build(
+      idea: idea,
       generated_prompt: generated,
       category: category,
       tone: tone,
       format: format
     )
 
-    @generated_prompt = generated
-    # keep the original user inputs so Back/Edit can repopulate the form
-    @previous_input = {
-      idea: user_input,
-      category: category,
-      tone: tone,
-      format: format
-    }
-    render :show
+    if @prompt.save
+      # store previous input so Back/Edit works
+      @previous_input = { idea: idea, category: category, tone: tone, format: format }
+
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("prompt_show", partial: "prompts/show_frame", locals: { prompt: @prompt }),
+            turbo_stream.prepend("sidebar_history", partial: "prompts/sidebar_item", locals: { prompt: @prompt })
+          ]
+        end
+
+        format.html { redirect_to prompt_path(@prompt), notice: "Prompt generated and saved." }
+      end
+    else
+      @error = @prompt.errors.full_messages.to_sentence
+      @previous_input = { idea: idea, category: category, tone: tone, format: format }
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("prompt_form", partial: "prompts/form", locals: { prompt: @prompt }) }
+        format.html { flash.now[:alert] = @error; render :new, status: :unprocessable_entity }
+      end
+    end
   rescue => e
     @error = "AI service error: #{e.message}"
-    # keep previously submitted values so form can repopulate
-    @previous_input = { idea: user_input, category: category, tone: tone, format: format }
-    render :new, status: :service_unavailable
+    @previous_input = { idea: idea, category: category, tone: tone, format: format }
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: turbo_stream.replace("prompt_form", partial: "prompts/form", locals: { prompt: Prompt.new(idea: idea) }) }
+      format.html { flash.now[:alert] = @error; render :new, status: :service_unavailable }
+    end
   end
 
   def show
     @prompt = current_user.prompts.find(params[:id])
-    # show view will render within a turbo frame if requested
     respond_to do |format|
-      format.html # show.html.erb (full page)
+      format.html
       format.turbo_stream { render partial: "prompts/show_frame", locals: { prompt: @prompt } }
     end
-  end
-
-  # optional index (history)
-  def index
-    @prompts = current_user.prompts.order(created_at: :desc).limit(50)
   end
 end

@@ -1,11 +1,9 @@
-<%= turbo_frame_tag "prompt_show" do %>
-  <div class="p-4 bg-gray-50 rounded">
-    <h4 class="font-semibold mb-2">Generated Prompt</h4>
-    <pre class="p-3 bg-white border rounded whitespace-pre-wrap"><%= prompt.generated_prompt %></pre>
+<div class="bg-white p-4 rounded shadow" id="prompt_result_<%= prompt.id %>">
+  <h2 class="text-lg font-semibold mb-2">Generated Prompt</h2>
+  <pre class="whitespace-pre-wrap"><%= prompt.generated_prompt %></pre>
 
-    <div class="mt-3 flex gap-2">
-      <button class="px-3 py-2 rounded bg-green-600 text-white copy-btn" data-text="<%= j prompt.generated_prompt %>">Copy</button>
-      <%= link_to "Edit / Re-run", new_prompt_path(prompt: { idea: prompt.idea, category: prompt.category, tone: prompt.tone, format: prompt.format }), class: "underline" %>
-    </div>
+  <div class="mt-3 flex gap-2 items-center">
+    <button class="copy-btn px-3 py-2 rounded bg-brand text-white" data-text="<%= j prompt.generated_prompt %>">Copy</button>
+    <%= link_to "Edit / Re-run", new_prompt_path(prompt: { idea: prompt.idea, category: prompt.category, tone: prompt.tone, format: prompt.format }), class: "underline" %>
   </div>
-<% end %>
+</div>
