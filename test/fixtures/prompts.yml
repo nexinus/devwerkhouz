@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  idea: MyText
+  generated_prompt: MyText
+  category: MyString
+  tone: MyString
+  format: MyString
+
+two:
+  user: two
+  idea: MyText
+  generated_prompt: MyText
+  category: MyString
+  tone: MyString
+  format: MyString

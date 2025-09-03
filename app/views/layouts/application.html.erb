@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "Devwerkhouz" %></title>
+    <title><%= content_for(:title) || "devwerkhouz — The houz for your AI Prompt" %></title>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -18,15 +19,106 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen flex flex-col">
-    <%= render 'shared/header' %>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
-    </main>
-    <%= render 'shared/footer' %>
-  </body>
+  <body class="min-h-screen bg-gray-50 text-gray-900">
+  <div id="app" class="flex h-screen overflow-hidden">
+    <!-- Sidebar (collapsible) -->
+    <%= render 'shared/sidebar' %>
+
+    <!-- Main area (header + content + footer inside a vertical column) -->
+    <div class="flex-1 flex flex-col min-h-0">
+      <!-- Header -->
+      <header class="border-b bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <%= render 'shared/header' %>
+        </div>
+      </header>
+
+      <!-- Content area -->
+      <main id="main" class="flex-1 overflow-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <% flash.each do |key, message| %>
+            <div class="mb-3 p-3 rounded text-sm <%= key == 'notice' ? 'bg-brand/10 text-brand' : 'bg-red-50 text-red-800' %>">
+              <%= message %>
+            </div>
+          <% end %>
+
+          <%= yield %>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="border-t bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <%= render 'shared/footer' %>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Cookie consent -->
+  <%= render 'shared/cookie_consent' %>
+
+  <!-- Sidebar toggle + small helper JS -->
+  <script>
+    (function() {
+      const root = document.getElementById('app');
+      const SIDEBAR_KEY = 'devwerkhouz_sidebar_open';
+
+      function isOpen() {
+        return localStorage.getItem(SIDEBAR_KEY) !== 'false';
+      }
+
+      function apply() {
+        if (isOpen()) {
+          root.classList.remove('sidebar-closed');
+          root.classList.add('sidebar-open');
+        } else {
+          root.classList.remove('sidebar-open');
+          root.classList.add('sidebar-closed');
+        }
+      }
+
+      // initial
+      apply();
+
+      // expose toggle on window for header button
+      window.toggleSidebar = function() {
+        localStorage.setItem(SIDEBAR_KEY, !isOpen());
+        apply();
+      };
+
+      // close sidebar on small screens by default
+      if (window.innerWidth < 768 && localStorage.getItem(SIDEBAR_KEY) === null) {
+        localStorage.setItem(SIDEBAR_KEY, 'false');
+        apply();
+      }
+
+      // copy buttons handler (global)
+      function initCopyButtons() {
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+          if (btn.dataset.bound) return;
+          btn.dataset.bound = '1';
+          btn.addEventListener('click', () => {
+            const text = btn.getAttribute('data-text') || btn.getAttribute('data-clipboard-text');
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+              const old = btn.innerHTML;
+              btn.innerHTML = 'Copied';
+              setTimeout(()=> btn.innerHTML = old, 1300);
+            });
+          });
+        });
+      }
+
+      document.addEventListener('turbo:load', initCopyButtons);
+      document.addEventListener('DOMContentLoaded', initCopyButtons);
+    })();
+  </script>
+</body>
 </html>

@@ -8,3 +8,8 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* Ensure the compiled Tailwind build (app/assets/builds/tailwind.css) is imported */
+@import "tailwind.css";
+
+/* Add any other app-level CSS below */

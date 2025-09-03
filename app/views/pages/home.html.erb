@@ -1,106 +1,45 @@
-<div class="min-h-screen bg-gray-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Top Nav (we render existing header partial) -->
-    <%= render 'shared/header' %>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- left: empty (sidebar lives in layout) or promotional column -->
+  <div class="hidden lg:block"></div>
 
-    <!-- Hero -->
-    <main class="pt-12 pb-16">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
-            The houz for your AI prompt
-          </h1>
-          <p class="mt-4 text-lg text-gray-600 max-w-xl">
-            Turn your idea into a perfect AI prompt — fast. Generate clean, high-quality prompts for any model
-            and save them to your history. Minimal UI, professional results.
-          </p>
+  <!-- center: main prompt area -->
+  <div class="lg:col-span-2">
+    <div class="bg-white border rounded-lg shadow p-6">
+      <h1 class="text-2xl font-bold mb-3">The houz for your AI prompt</h1>
+      <p class="text-gray-600 mb-4">Turn your idea into a perfect prompt—fast. Save and reuse prompts like a pro.</p>
 
-          <div class="mt-6 flex gap-3">
-            <% if user_signed_in? %>
-              <%= link_to "Create a Prompt", new_prompt_path, class: "inline-flex items-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700" %>
-              <%= link_to "Your Prompts", prompts_path, class: "inline-flex items-center px-4 py-3 border border-gray-200 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
-            <% else %>
-              <%= link_to "Get started — it's free", signup_path, class: "inline-flex items-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700" %>
-              <%= link_to "See how it works", "#how", class: "inline-flex items-center px-4 py-3 border border-gray-200 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
-            <% end %>
-          </div>
+      <%= render 'prompts/form' %>
 
-          <div class="mt-8">
-            <div class="inline-flex items-center text-sm text-gray-500 space-x-3">
-              <span class="font-medium text-gray-700">Works with:</span>
-              <span class="px-2 py-1 rounded bg-white shadow-sm">Chat-style LLMs</span>
-              <span class="px-2 py-1 rounded bg-white shadow-sm">Text & Image models</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Live sample & mini prompt generator -->
-        <div class="bg-white border rounded-lg shadow p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-lg font-medium text-gray-900">Try a sample prompt</h3>
-              <p class="text-sm text-gray-500">Type an idea and hit Generate — we’ll create a ready-to-use prompt.</p>
-            </div>
-            <div>
-              <% if user_signed_in? %>
-                <span class="inline-flex px-2.5 py-1 rounded text-xs bg-green-100 text-green-800">Saved</span>
-              <% else %>
-                <span class="inline-flex px-2.5 py-1 rounded text-xs bg-gray-100 text-gray-700">Guest</span>
-              <% end %>
-            </div>
-          </div>
-
-          <div class="mt-4">
-            <%= form_with url: prompt_path, scope: :prompt, local: false, class: "space-y-3" do |f| %>
-              <div>
-                <%= f.text_area :idea, placeholder: "e.g. Help me write a product description for an ergonomic office chair", rows: 4, class: "w-full border rounded p-3 focus:outline-none focus:ring-2 focus:ring-green-300" %>
+      <div id="prompt-result" class="mt-6">
+        <%= turbo_frame_tag "prompt_show" do %>
+          <% if @generated_prompt.present? %>
+            <div class="p-4 bg-gray-50 rounded">
+              <pre class="whitespace-pre-wrap"><%= @generated_prompt %></pre>
+              <div class="mt-3">
+                <button class="copy-btn px-3 py-2 rounded bg-brand text-white" data-text="<%= j @generated_prompt %>">Copy</button>
               </div>
-
-              <div class="flex gap-2">
-                <%= f.select :category, ["Writing", "Marketing", "Code", "Other"], {include_blank: "Category"}, class: "border p-2 rounded w-1/2" %>
-                <%= f.select :tone, ["Formal", "Informal", "Friendly"], {include_blank: "Tone"}, class: "border p-2 rounded w-1/2" %>
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-500">Model: <strong>General</strong></div>
-                <div>
-                  <%= f.submit "Generate", class: "px-4 py-2 bg-green-600 text-white rounded" %>
-                </div>
-              </div>
-            <% end %>
-          </div>
-
-          <div class="mt-4 text-xs text-gray-500">
-            Tip: keep inputs short & specific for best results.
-          </div>
-        </div>
+            </div>
+          <% else %>
+            <div class="text-sm text-gray-500">Your generated prompt will appear here.</div>
+          <% end %>
+        <% end %>
       </div>
-    </main>
+    </div>
 
-    <!-- How it works -->
-    <section id="how" class="pb-20">
-      <div class="max-w-5xl mx-auto text-center">
-        <h2 class="text-2xl font-semibold text-gray-900">How it works</h2>
-        <p class="mt-3 text-gray-600">Three simple steps to a perfect prompt.</p>
-
-        <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div class="bg-white p-6 rounded-lg shadow">
-            <h4 class="font-semibold">1. Describe</h4>
-            <p class="mt-2 text-sm text-gray-600">Tell us your idea in plain language.</p>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow">
-            <h4 class="font-semibold">2. Generate</h4>
-            <p class="mt-2 text-sm text-gray-600">We create a concise, model-ready prompt.</p>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow">
-            <h4 class="font-semibold">3. Save & Reuse</h4>
-            <p class="mt-2 text-sm text-gray-600">Store prompts in your history for future reuse.</p>
-          </div>
-        </div>
+    <!-- how it works -->
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white p-4 rounded shadow">
+        <h4 class="font-semibold">1. Describe</h4>
+        <p class="text-sm text-gray-600">Tell us your idea in plain language.</p>
       </div>
-    </section>
-
-    <!-- Footer (render shared footer partial) -->
-    <%= render 'shared/footer' %>
+      <div class="bg-white p-4 rounded shadow">
+        <h4 class="font-semibold">2. Generate</h4>
+        <p class="text-sm text-gray-600">We create a concise, model-ready prompt.</p>
+      </div>
+      <div class="bg-white p-4 rounded shadow">
+        <h4 class="font-semibold">3. Save</h4>
+        <p class="text-sm text-gray-600">Store prompts in your history for future reuse.</p>
+      </div>
+    </div>
   </div>
 </div>

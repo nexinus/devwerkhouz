@@ -5,6 +5,30 @@
       <a href="/privacy" class="hover:underline">Privacy</a>
       <a href="/terms" class="hover:underline">Terms</a>
       <a href="/impressum" class="hover:underline">Impressum</a>
+      <%= render 'shared/cookie_consent' %>
     </nav>
   </div>
 </footer>
+
+<script>
+document.addEventListener("turbo:submit-end", function(e) {
+  // if the response replaced #prompt-result content, scroll to it
+  const frame = document.getElementById("prompt-result");
+  if (frame) { frame.scrollIntoView({behavior: "smooth", block: "start"}); }
+});
+</script>
+
+<script>
+document.addEventListener("turbo:load", function() {
+  document.querySelectorAll(".copy-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const text = btn.getAttribute("data-text");
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerText;
+        btn.innerText = "Copied";
+        setTimeout(() => btn.innerText = original, 1500);
+      });
+    });
+  });
+});
+</script>

@@ -10,7 +10,16 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "prompts#new"
+  # root "prompts#new"
+  root "pages#home"
+
+  # auth
+  get "/signup", to: "registrations#new", as: :signup
+  post "/signup", to: "registrations#create"
+
+  get "/login", to: "sessions#new", as: :login
+  post "/login", to: "sessions#create"
+  delete "/logout", to: "sessions#destroy", as: :logout
 
   # Static pages
   get "/privacy", to: "pages#privacy"
@@ -18,4 +27,5 @@ Rails.application.routes.draw do
   get "/impressum", to: "pages#impressum"
 
   resource :prompt, only: [ :new, :create ], controller: "prompts"
+  resources :prompts, only: [:show, :index] # index for history
 end

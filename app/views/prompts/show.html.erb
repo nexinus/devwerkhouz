@@ -39,6 +39,7 @@
     <div class="p-4 text-gray-600">No prompt generated. Try again.</div>
     <div class="mt-2"><%= link_to "Back", new_prompt_path %></div>
   <% end %>
+  <%= render partial: "show_frame", locals: { prompt: @prompt } %>
 </div>
 
 

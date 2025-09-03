@@ -1,21 +1,18 @@
-<header class="py-4">
-  <div class="flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <%= link_to root_path, class: "flex items-center gap-3" do %>
-        <div class="h-8 w-8 bg-green-600 text-white rounded flex items-center justify-center font-bold">D</div>
-        <span class="text-lg font-semibold text-gray-900">devwerkhouz</span>
-      <% end %>
-    </div>
-
-    <nav class="flex items-center gap-4">
-      <% if user_signed_in? %>
-        <span class="text-sm text-gray-700">Hi, <%= current_user.name %></span>
-        <%= link_to "Your prompts", prompts_path, class: "px-3 py-1 rounded text-sm bg-gray-100 hover:bg-gray-50" %>
-        <%= button_to "Sign out", logout_path, method: :delete, class: "px-3 py-1 text-sm rounded bg-red-50 text-red-700" %>
-      <% else %>
-        <%= link_to "Sign in", login_path, class: "text-sm text-gray-700 px-3 py-1 rounded hover:bg-gray-50" %>
-        <%= link_to "Sign up", signup_path, class: "text-sm text-white px-3 py-1 rounded bg-green-600 hover:bg-green-700" %>
-      <% end %>
-    </nav>
+<div class="flex items-center justify-between py-3">
+  <div class="flex items-center gap-4">
+    <!-- small toggle button visible on small screens too -->
+    <button onclick="toggleSidebar()" class="md:hidden p-2 rounded hover:bg-gray-100">
+      <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
   </div>
-</header>
+
+  <div class="flex items-center gap-3">
+    <% if user_signed_in? %>
+      <span class="text-sm text-gray-700 hidden md:inline">Hi, <%= current_user.name %></span>
+      <%= button_to "Sign out", logout_path, method: :delete, class: "px-3 py-1 rounded text-sm bg-brand text-white" %>
+    <% else %>
+      <%= link_to "Sign in", login_path, class: "text-sm px-3 py-1 rounded hover:bg-gray-50" %>
+      <%= link_to "Sign up", signup_path, class: "text-sm px-3 py-1 rounded bg-brand text-white" %>
+    <% end %>
+  </div>
+</div>

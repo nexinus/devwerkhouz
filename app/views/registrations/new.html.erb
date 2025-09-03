@@ -1,0 +1,22 @@
+<div class="max-w-md mx-auto py-8">
+  <h1 class="text-xl font-semibold mb-4">Sign up</h1>
+  <%= form_with url: signup_path, scope: :user, local: true do |f| %>
+    <div class="mb-2">
+      <%= f.label :name %>
+      <%= f.text_field :name, class: "w-full border rounded p-2", required: true %>
+    </div>
+    <div class="mb-2">
+      <%= f.label :email %>
+      <%= f.email_field :email, class: "w-full border rounded p-2", required: true %>
+    </div>
+    <div class="mb-2">
+      <%= f.label :password %>
+      <%= f.password_field :password, class: "w-full border rounded p-2", required: true %>
+    </div>
+    <div class="mb-4">
+      <%= f.label :password_confirmation %>
+      <%= f.password_field :password_confirmation, class: "w-full border rounded p-2" %>
+    </div>
+    <%= f.submit "Sign up", class: "px-4 py-2 bg-green-600 text-white rounded" %>
+  <% end %>
+</div>
