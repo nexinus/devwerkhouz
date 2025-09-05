@@ -9,14 +9,7 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
-/* Tailwind is linked separately via stylesheet_link_tag "tailwind".
-   Do not @import the source file here to avoid routing to /tailwind/application.css. */
+/* Ensure the compiled Tailwind build (app/assets/builds/tailwind.css) is imported */
+@import "../tailwind/application.css";
 
-:root {
-  --brand: #819231;
-}
-
-/* Fallback utilities to ensure brand color is present in the bundle even if purged */
-.bg-brand { background-color: var(--brand); }
-.text-brand { color: var(--brand); }
-.hover\:bg-brand:hover { background-color: var(--brand); }
+/* Add any other app-level CSS below */

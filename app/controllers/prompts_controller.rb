@@ -6,15 +6,27 @@ class PromptsController < ApplicationController
   end
 
   def new
+    # prefill from params (useful when linking back to edit)
     @prompt = Prompt.new(idea: params.dig(:prompt, :idea) || params[:idea])
   end
 
   def create
-    idea = params.dig(:prompt, :idea)
-    category = params.dig(:prompt, :category)
-    tone = params.dig(:prompt, :tone)
-    format = params.dig(:prompt, :format)
+    # Accept either nested params[:prompt][:idea] OR top-level params[:idea]
+    idea     = params.dig(:prompt, :idea) || params[:idea]
+    category = params.dig(:prompt, :category) || params[:category]
+    tone     = params.dig(:prompt, :tone) || params[:tone]
+    format   = params.dig(:prompt, :format) || params[:format]
 
+    # Keep a previous input hash to repopulate the form if needed
+    @previous_input = { idea: idea, category: category, tone: tone, format: format }
+
+    # Guard: idea required
+    unless idea.present?
+      @error = "Please enter an idea to generate a prompt."
+      return render_new_with_error
+    end
+
+    # Build the system prompt for the LLM
     system_prompt = <<~PROMPT
       You are a professional prompt engineer. Create a single concise and clear prompt for a large language model based on the user's idea below.
 
@@ -26,6 +38,7 @@ class PromptsController < ApplicationController
       Output only the final prompt. Do not include explanations.
     PROMPT
 
+    # Call the AI
     client = OpenAI::Client.new
     response = client.chat(
       parameters: {
@@ -38,11 +51,16 @@ class PromptsController < ApplicationController
       }
     )
 
-    # set local variable and instance var for templates
+    # Use a single local variable and instance var for the result
     generated = response.dig("choices", 0, "message", "content")&.strip
     @generated_prompt = generated
 
-    # save prompt for current_user (user is required per your model)
+    if generated.blank?
+      @error = "AI returned no content. Try again."
+      return render_new_with_error
+    end
+
+    # Save as current_user.prompt (your Prompt model requires a user)
     @prompt = current_user.prompts.build(
       idea: idea,
       generated_prompt: generated,
@@ -52,9 +70,6 @@ class PromptsController < ApplicationController
     )
 
     if @prompt.save
-      # store previous input so Back/Edit works
-      @previous_input = { idea: idea, category: category, tone: tone, format: format }
-
       respond_to do |format|
         format.turbo_stream do
           render turbo_stream: [
@@ -67,19 +82,15 @@ class PromptsController < ApplicationController
       end
     else
       @error = @prompt.errors.full_messages.to_sentence
-      @previous_input = { idea: idea, category: category, tone: tone, format: format }
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("prompt_form", partial: "prompts/form", locals: { prompt: @prompt }) }
-        format.html { flash.now[:alert] = @error; render :new, status: :unprocessable_entity }
-      end
+      render_new_with_error
     end
-  rescue => e
+
+  rescue OpenAI::Error => e
     @error = "AI service error: #{e.message}"
-    @previous_input = { idea: idea, category: category, tone: tone, format: format }
-    respond_to do |format|
-      format.turbo_stream { render turbo_stream: turbo_stream.replace("prompt_form", partial: "prompts/form", locals: { prompt: Prompt.new(idea: idea) }) }
-      format.html { flash.now[:alert] = @error; render :new, status: :service_unavailable }
-    end
+    render_new_with_error
+  rescue => e
+    @error = "Unexpected error: #{e.message}"
+    render_new_with_error
   end
 
   def show
@@ -87,6 +98,15 @@ class PromptsController < ApplicationController
     respond_to do |format|
       format.html
       format.turbo_stream { render partial: "prompts/show_frame", locals: { prompt: @prompt } }
+    end
+  end
+
+  private
+
+  def render_new_with_error
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: turbo_stream.replace("prompt_form", partial: "prompts/form", locals: { prompt: @prompt || Prompt.new }) }
+      format.html { flash.now[:alert] = @error; render :new, status: :unprocessable_entity }
     end
   end
 end

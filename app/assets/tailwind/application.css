@@ -1,13 +1,5 @@
 @import "tailwindcss";
 
-/* >>> devwerkhouz brand utilities (ensures #819231 is compiled) */
-@layer utilities {
-  .bg-brand               { background-color: #819231 !important; }
-  .text-brand             { color: #819231 !important; }
-  /* support the "bg-brand/10" style and the class without slash "bg-brand-10" */
-  .bg-brand\/10           { background-color: rgba(129,146,49,0.10) !important; }
-  .bg-brand-10            { background-color: rgba(129,146,49,0.10) !important; }
-  .hover\:bg-brand:hover  { background-color: #819231 !important; }
-  .focus\:ring-brand:focus { box-shadow: 0 0 0 4px rgba(129,146,49,0.20) !important; }
+@theme {
+  --color-brand: #819231;
 }
-/* <<< end devwerkhouz brand utilities */
