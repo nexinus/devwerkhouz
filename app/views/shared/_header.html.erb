@@ -1,26 +1,31 @@
-<div class="flex items-center justify-between py-3">
+<div class="flex items-center justify-between h-12 md:h-16 px-4 relative overflow-visible">
   <div class="flex items-center gap-4">
-    <!-- small toggle button visible on small screens too -->
-    <button onclick="toggleSidebar()" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors duration-150">
-      <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
 
-    <!-- brand / logo area (example) -->
-    <div class="hidden sm:flex items-center gap-3">
-      <%= link_to root_path, class: "flex items-center gap-2" do %>
-        <span class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white font-semibold">D</span>
-        <span class="text-lg font-semibold text-gray-800">devwerkhouz</span>
+    <!-- brand / logo area -->
+    <!-- responsive logo: small inline on mobile, large absolute on md+ -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <!-- small inline logo (mobile) -->
+      <%= link_to root_path, class: "block md:hidden" do %>
+        <%= image_tag "dwh_fullname.png", alt: "devwerkhouz",
+          class: "h-8 w-auto object-contain" %>
       <% end %>
     </div>
+
+    <!-- Large absolute logo for md+ screens (positioned relative to the header container) -->
+    <%= link_to root_path, class: "hidden md:block absolute left-[10px] top-1/2 -translate-y-1/2 z-20 pointer-events-auto" do %>
+      <%= image_tag "dwh_fullname.png", alt: "devwerkhouz",
+        class: "h-[140px] w-auto object-contain" %>
+    <% end %>
   </div>
 
   <div class="flex items-center gap-3">
     <% if user_signed_in? %>
       <span class="text-sm text-gray-700 hidden md:inline">Hi, <%= current_user.name %></span>
-      <%= button_to "Sign out", logout_path, method: :delete, class: "px-3 py-1 text-sm bg-brand text-white rounded cursor-pointer transition transform hover:bg-brand/80 hover:scale-105 hover:shadow-sm" %>
+      <%= button_to "Sign out", logout_path, method: :delete,
+            class: "px-3 py-2 text-sm bg-brand text-white rounded inline-flex items-center justify-center h-9 cursor-pointer transition transform hover:bg-brand/80 hover:scale-105 hover:shadow-sm" %>
     <% else %>
-      <%= link_to "Sign in", login_path, class: "text-sm px-3 py-1 rounded hover:text-brand transition-colors duration-150" %>
-      <%= link_to "Sign up", signup_path, class: "text-sm px-3 py-1 rounded bg-brand text-white hover:bg-brand/80 transition-colors duration-150" %>
+      <%= link_to "Sign in", login_path, class: "text-sm px-3 py-2 rounded hover:text-brand transition-colors duration-150 inline-flex items-center h-9" %>
+      <%= link_to "Sign up", signup_path, class: "text-sm px-3 py-2 rounded bg-brand text-white hover:bg-brand/80 transition-colors duration-150 inline-flex items-center h-9" %>
     <% end %>
   </div>
 </div>

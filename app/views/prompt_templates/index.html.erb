@@ -1,0 +1,50 @@
+<div class="max-w-6xl mx-auto py-8">
+  <h2 class="text-xl font-semibold mb-4">Prompt Library</h2>
+
+  <div class="mb-4 flex gap-2">
+    <%= link_to "All", prompt_templates_path, class: "px-3 py-1 rounded bg-gray-100" %>
+    <% ["Writing","Marketing","Code","Other"].each do |c| %>
+      <%= link_to c, prompt_templates_path(category: c), class: "px-3 py-1 rounded hover:bg-gray-50 #{'bg-brand/10 text-brand' if params[:category]==c}" %>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <% @templates.each do |t| %>
+      <div class="p-4 border rounded bg-white">
+        <div class="flex justify-between items-start">
+          <h3 class="font-medium"><%= t.title %></h3>
+          <div class="text-sm text-gray-400"><%= t.category %></div>
+        </div>
+
+        <pre class="mt-2 whitespace-pre-wrap text-sm text-gray-700"><%= t.prompt_text %></pre>
+
+        <div class="mt-3 flex items-center gap-2">
+          <!-- Use: open new prompt form with idea prefilled -->
+          <%= link_to "Use", new_prompt_path(prompt: { idea: t.prompt_text }), class: "px-3 py-1 rounded bg-brand text-white" %>
+
+          <!-- Copy: client-side copy -->
+          <a href="#" class="px-3 py-1 border rounded copy-template" data-text="<%= j t.prompt_text %>">Copy</a>
+
+          <!-- Like: remote post to likes endpoint -->
+          <%= button_to "Like (#{t.likes_count})", like_prompt_template_path(t), method: :post, remote: true, class: "px-2 py-1 rounded border text-sm" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+document.addEventListener("turbo:load", function() {
+  document.querySelectorAll(".copy-template").forEach(btn=>{
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      const text = this.dataset.text;
+      navigator.clipboard.writeText(text).then(()=> {
+        const old = this.innerText;
+        this.innerText = "Copied";
+        setTimeout(()=> this.innerText = old, 1200);
+      });
+    });
+  });
+});
+</script>

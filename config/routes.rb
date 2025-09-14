@@ -11,7 +11,8 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "prompts#new"
-  root "pages#home"
+  root "pages#_hero"
+  #root "pages#home"
 
   # auth
   get "/signup", to: "registrations#new", as: :signup
@@ -27,4 +28,12 @@ Rails.application.routes.draw do
   get "/impressum", to: "pages#impressum"
 
   resources :prompts, only: %i[index new create show]
+  resources :prompt_templates, only: %i[index show create] do
+    member do
+      post :like
+    end
+    collection do
+      get :categories
+    end
+  end  
 end

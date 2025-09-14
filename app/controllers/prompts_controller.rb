@@ -1,5 +1,5 @@
 class PromptsController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, only: %i[index show]
 
   def index
     @prompts = current_user.prompts.order(created_at: :desc).limit(50)
@@ -60,29 +60,50 @@ class PromptsController < ApplicationController
       return render_new_with_error
     end
 
-    # Save as current_user.prompt (your Prompt model requires a user)
-    @prompt = current_user.prompts.build(
-      idea: idea,
-      generated_prompt: generated,
-      category: category,
-      tone: tone,
-      format: format
-    )
+    # If user is signed in -> persist and update sidebar history; otherwise keep ephemeral
+    if user_signed_in?
+      @prompt = current_user.prompts.build(
+        idea: idea,
+        generated_prompt: generated,
+        category: category,
+        tone: tone,
+        format: format
+      )
 
-    if @prompt.save
+      if @prompt.save
+        respond_to do |format|
+          format.turbo_stream do
+            render turbo_stream: [
+              turbo_stream.replace("prompt_show", partial: "prompts/show_frame", locals: { prompt: @prompt }),
+              turbo_stream.prepend("sidebar_history", partial: "prompts/sidebar_item", locals: { prompt: @prompt })
+            ]
+          end
+
+          format.html { redirect_to prompt_path(@prompt), notice: "Prompt generated and saved." }
+        end
+      else
+        @error = @prompt.errors.full_messages.to_sentence
+        render_new_with_error
+      end
+
+    else
+      # Guest user: don't save (Prompt.belongs_to :user requires a user_id)
+      @prompt = Prompt.new(
+        idea: idea,
+        generated_prompt: generated,
+        category: category,
+        tone: tone,
+        format: format
+      )
+
+      # Return the result to the page (Turbo stream or full HTML)
       respond_to do |format|
         format.turbo_stream do
-          render turbo_stream: [
-            turbo_stream.replace("prompt_show", partial: "prompts/show_frame", locals: { prompt: @prompt }),
-            turbo_stream.prepend("sidebar_history", partial: "prompts/sidebar_item", locals: { prompt: @prompt })
-          ]
+          render turbo_stream: turbo_stream.replace("prompt_show", partial: "prompts/show_frame", locals: { prompt: @prompt })
         end
 
-        format.html { redirect_to prompt_path(@prompt), notice: "Prompt generated and saved." }
+        format.html { render :show }
       end
-    else
-      @error = @prompt.errors.full_messages.to_sentence
-      render_new_with_error
     end
 
   rescue OpenAI::Error => e

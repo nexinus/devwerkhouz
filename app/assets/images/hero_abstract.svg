@@ -1,0 +1,43 @@
+<!-- hero_abstract.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" width="1200" height="800" role="img" aria-labelledby="title desc">
+  <title id="title">devwerkhouz abstract hero</title>
+  <desc id="desc">Abstract geometric shapes in brand green and neutral grays representing AI and structure.</desc>
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1">
+      <stop offset="0" stop-color="#dbe6ba" stop-opacity="1"/>
+      <stop offset="1" stop-color="#f6fbf2" stop-opacity="1"/>
+    </linearGradient>
+    <filter id="f1" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="14" flood-color="#000" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Background is transparent; use subtle rounded cluster composition -->
+  <g transform="translate(120,80)">
+    <!-- large rounded rectangle -->
+    <rect x="0" y="0" rx="28" ry="28" width="560" height="360" fill="url(#g1)" filter="url(#f1)"/>
+    <!-- small brand tile -->
+    <rect x="420" y="220" rx="16" ry="16" width="220" height="140" fill="#819231" opacity="0.95"/>
+    <!-- intersecting circles -->
+    <circle cx="200" cy="120" r="86" fill="#ffffff" opacity="0.35"/>
+    <circle cx="260" cy="180" r="58" fill="#819231" opacity="0.12"/>
+    <!-- decorative lines -->
+    <g stroke="#6b7280" stroke-width="2" stroke-linecap="round" opacity="0.22">
+      <path d="M-20 320 L 640 320" />
+      <path d="M-10 340 L 640 340" />
+    </g>
+    <!-- small geometric tokens -->
+    <rect x="30" y="260" rx="8" ry="8" width="84" height="48" fill="#819231" opacity="0.12"/>
+    <rect x="120" y="290" rx="8" ry="8" width="48" height="32" fill="#6b7280" opacity="0.08"/>
+  </g>
+
+  <!-- right-side clean card -->
+  <g transform="translate(700,120)">
+    <rect x="0" y="0" width="380" height="240" rx="18" fill="#ffffff" opacity="0.95" filter="url(#f1)"/>
+    <rect x="24" y="22" width="120" height="18" rx="6" fill="#819231"/>
+    <rect x="24" y="54" width="320" height="14" rx="6" fill="#6b7280" opacity="0.12"/>
+    <rect x="24" y="78" width="280" height="14" rx="6" fill="#6b7280" opacity="0.08"/>
+    <!-- icon-ish dots -->
+    <circle cx="330" cy="40" r="8" fill="#819231" opacity="0.95"/>
+  </g>
+</svg>

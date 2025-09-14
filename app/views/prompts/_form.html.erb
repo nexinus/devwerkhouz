@@ -2,7 +2,7 @@
   <%# prefer a passed-in local, then @prompt, else new prompt object %>
   <% model = local_assigns[:prompt] || defined?(@prompt) && @prompt || Prompt.new %>
 
-  <%= form_with model: model, scope: :prompt, local: false, class: "space-y-3" do |f| %>
+  <%= form_with url: prompts_path, scope: :prompt, method: :post, local: false, class: "..." do |f| %>
     <div class="mb-3">
       <%= f.label :idea, "Your idea", class: "block text-sm font-medium text-gray-700" %>
       <%= f.text_area :idea,

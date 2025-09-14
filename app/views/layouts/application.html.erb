@@ -14,9 +14,8 @@
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="icon" href="<%= asset_path 'favicon.ico' %>" type="image/x-icon">
+    <link rel="apple-touch-icon" href="<%= asset_path 'logo.png' %>">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
@@ -68,57 +67,81 @@
   <script>
     (function() {
       const root = document.getElementById('app');
+      const sidebar = document.getElementById('sidebar');
+      const collapseBtn = document.getElementById('sidebarCollapseBtn');
       const SIDEBAR_KEY = 'devwerkhouz_sidebar_open';
+
+      // elements we'll toggle
+      const labelNodes = () => Array.from(document.querySelectorAll('[data-label]'));
+      const newTop = document.getElementById('newPromptTop');
+      const newCompact = document.getElementById('newPromptCompact');
+      const newBottom = document.getElementById('newPromptBottom');
+      const historyEl = document.getElementById('sidebarHistory');
 
       function isOpen() {
         return localStorage.getItem(SIDEBAR_KEY) !== 'false';
       }
 
-      function apply() {
-        if (isOpen()) {
-          root.classList.remove('sidebar-closed');
-          root.classList.add('sidebar-open');
-        } else {
-          root.classList.remove('sidebar-open');
-          root.classList.add('sidebar-closed');
-        }
-      }
-
-      // initial
-      apply();
-
-      // expose toggle on window for header button
-      window.toggleSidebar = function() {
-        localStorage.setItem(SIDEBAR_KEY, !isOpen());
-        apply();
-      };
-
-      // close sidebar on small screens by default
-      if (window.innerWidth < 768 && localStorage.getItem(SIDEBAR_KEY) === null) {
-        localStorage.setItem(SIDEBAR_KEY, 'false');
-        apply();
-      }
-
-      // copy buttons handler (global)
-      function initCopyButtons() {
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-          if (btn.dataset.bound) return;
-          btn.dataset.bound = '1';
-          btn.addEventListener('click', () => {
-            const text = btn.getAttribute('data-text') || btn.getAttribute('data-clipboard-text');
-            if (!text) return;
-            navigator.clipboard.writeText(text).then(() => {
-              const old = btn.innerHTML;
-              btn.innerHTML = 'Copied';
-              setTimeout(()=> btn.innerHTML = old, 1300);
-            });
-          });
+      function showLabels(show) {
+        labelNodes().forEach(n => {
+          if (show) n.classList.remove('hidden'); else n.classList.add('hidden');
         });
       }
 
-      document.addEventListener('turbo:load', initCopyButtons);
-      document.addEventListener('DOMContentLoaded', initCopyButtons);
+      function applyState() {
+        if (!sidebar) return;
+
+        if (isOpen()) {
+          sidebar.classList.remove('w-20','w-16');
+          sidebar.classList.add('w-64');
+
+          root?.classList.remove('sidebar-closed');
+          root?.classList.add('sidebar-open');
+
+          showLabels(true);
+
+          if (newTop) newTop.classList.remove('hidden');
+          if (newCompact) newCompact.classList.add('hidden');
+
+          if (newBottom) newBottom.classList.remove('hidden');
+
+          if (historyEl) historyEl.classList.remove('hidden');
+        } else {
+          sidebar.classList.remove('w-64');
+          sidebar.classList.add('w-20');
+
+          root?.classList.remove('sidebar-open');
+          root?.classList.add('sidebar-closed');
+
+          showLabels(false);
+
+          if (newTop) newTop.classList.add('hidden');
+          if (newCompact) newCompact.classList.remove('hidden');
+
+          if (newBottom) newBottom.classList.add('hidden');
+
+          if (historyEl) historyEl.classList.add('hidden');
+        }
+      }
+
+      function toggleSidebar() {
+        const newState = !isOpen();
+        localStorage.setItem(SIDEBAR_KEY, newState ? 'true' : 'false');
+        applyState();
+      }
+
+      if (collapseBtn) collapseBtn.addEventListener('click', toggleSidebar);
+      window.toggleSidebar = toggleSidebar;
+
+      if (window.innerWidth < 768 && localStorage.getItem(SIDEBAR_KEY) === null) {
+        localStorage.setItem(SIDEBAR_KEY, 'false');
+      }
+
+      document.addEventListener('DOMContentLoaded', applyState);
+      document.addEventListener('turbo:load', applyState);
+      window.addEventListener('resize', applyState);
     })();
   </script>
-</body>
+
+  </body>
 </html>

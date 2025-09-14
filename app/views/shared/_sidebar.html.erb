@@ -1,51 +1,76 @@
-<aside id="sidebar" class="bg-white border-r flex-shrink-0
-  transition-all duration-200 ease-in-out
-  sidebar-open:w-64 sidebar-closed:w-16">
-
-  <!-- Use utility wrapper to handle collapsed/expanded widths.
-       Tailwind cannot interpret 'sidebar-open:w-64' by default,
-       but we use JS to add/remove classes on root element. -->
-
+<aside id="sidebar" class="bg-white text-gray-900 border-r flex-shrink-0 transition-all duration-200 ease-in-out w-64">
   <div class="h-full flex flex-col">
-    <div class="px-3 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <%= link_to root_path, class: "flex items-center gap-2" do %>
-          <div class="h-8 w-8 rounded flex items-center justify-center text-white font-bold" style="background:brand">D</div>
-          <span class="hidden sidebar-closed:hidden md:inline-block font-semibold text-gray-900">devwerkhouz</span>
+
+    <!-- TOP: logo + collapse button -->
+    <div class="flex items-center justify-between px-3 py-3">
+      <div class="flex items-center gap-3">
+        <%= link_to root_path, class: "flex items-center gap-3" do %>
+          <img src="<%= asset_path('logo.png') %>" alt="logo" class="h-8 w-8 object-contain"/>
         <% end %>
       </div>
 
-      <button aria-label="Toggle sidebar" onclick="toggleSidebar()" class="p-1 rounded hover:bg-gray-100">
-        <!-- simple hamburger icon -->
-        <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <!-- collapse button (top-right) -->
+      <button id="sidebarCollapseBtn" aria-label="Collapse sidebar" class="p-1 rounded hover:bg-gray-100 focus:outline-none">
+        <svg class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             xmlns="http://www.w3.org/2000/svg"><path stroke-width="2" d="M6 18L18 6M6 6h12v12"/></svg>
       </button>
     </div>
 
-    <nav class="px-2 py-2 flex-1 overflow-y-auto">
-      <ul class="space-y-1">
-        <li>
-          <%= link_to new_prompt_path, class: "flex items-center gap-3 p-2 rounded hover:bg-gray-50" do %>
-            <svg class="h-5 w-5 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 4v16M4 12h16"/></svg>
-            <span class="hidden md:inline">New prompt</span>
-          <% end %>
-        </li>
+    <!-- New prompt (top) - big button when open; small icon when closed -->
+    <div class="px-3">
+      <div id="newPromptTop" class="mb-3">
+        <%= link_to new_prompt_path, class: "flex items-center gap-3 w-full px-3 py-2 rounded bg-brand text-white hover:bg-brand/80", title: "New prompt" do %>
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg>
+          <span data-label class="font-medium">New prompt</span>
+        <% end %>
+      </div>
 
-        <li class="mt-3">
-          <h4 class="text-xs text-gray-500 px-2 hidden md:block">History</h4>
-          <% if user_signed_in? %>
-            <% current_user.prompts.order(created_at: :desc).limit(20).each do |p| %>
-              <div class="px-1">
-                <%= link_to prompt_path(p), data: { turbo_frame: "prompt_show" }, class: "flex items-center gap-2 p-2 rounded hover:bg-gray-50 text-sm" do %>
-                  <span class="truncate"><%= p.idea.truncate(40) %></span>
-                  <span class="ml-auto text-xs text-gray-400 hidden md:inline"><%= p.created_at.strftime("%b %-d") %></span>
-                <% end %>
-              </div>
+      <!-- compact new (visible when closed) -->
+      <div id="newPromptCompact" class="mb-3 hidden">
+        <%= link_to new_prompt_path, class: "inline-flex items-center justify-center p-2 rounded hover:bg-gray-100", title: "New prompt" do %>
+          <svg class="h-6 w-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg>
+        <% end %>
+      </div>
+
+      <!-- Search -->
+      <div class="mb-3">
+        <div class="relative">
+          <input id="sidebarSearch" type="search" placeholder="Search prompts" class="w-full border rounded px-3 py-2 text-sm" />
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
+        </div>
+      </div>
+
+      <!-- Quick nav items (icons + labels) -->
+      <nav class="mb-4">
+        <ul class="space-y-1">
+          <li>
+            <%= link_to prompt_templates_path, class: "flex items-center gap-3 p-2 rounded hover:bg-gray-50" do %>
+              <svg class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+              <span data-label class="text-sm">Library</span>
             <% end %>
-          <% else %>
-            <p class="text-sm text-gray-500 px-2">Sign in to save prompts</p>
-          <% end %>
-        </li>
-      </ul>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="px-1">
+        <h4 data-label class="text-xs text-gray-500 mb-2">Prompts history</h4>
+      </div>
+    </div>
+
+    <!-- Prompts history list (scrollable) -->
+    <nav id="sidebar_history" class="px-2 py-2 flex-1 overflow-y-auto">
+      <% if user_signed_in? %>
+        <% current_user.prompts.order(created_at: :desc).limit(50).each do |p| %>
+          <div class="px-1">
+            <%= link_to prompt_path(p), data: { turbo_frame: "prompt_show" }, class: "flex items-center gap-2 p-2 rounded hover:bg-gray-50 text-sm" do %>
+              <span class="truncate"><%= p.idea.truncate(48) %></span>
+              <span class="ml-auto text-xs text-gray-400 hidden md:inline"><%= p.created_at.strftime("%b %-d") %></span>
+            <% end %>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="text-sm text-gray-500 px-3">Sign in to save prompts</p>
+      <% end %>
     </nav>
   </div>
 </aside>

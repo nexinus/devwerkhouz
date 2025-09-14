@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  prompt_text: MyText
+  category: MyString
+  author: one
+  public: false
+  likes_count: 1
+
+two:
+  title: MyString
+  prompt_text: MyText
+  category: MyString
+  author: two
+  public: false
+  likes_count: 1
