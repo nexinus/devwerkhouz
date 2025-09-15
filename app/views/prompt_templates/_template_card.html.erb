@@ -1,0 +1,23 @@
+<div class="p-4 border rounded bg-white">
+  <div class="flex justify-between items-start">
+    <h3 class="font-medium"><%= template.title %></h3>
+    <div class="text-sm text-gray-400"><%= template.category %></div>
+  </div>
+
+  <pre class="mt-2 whitespace-pre-wrap text-sm text-gray-700"><%= template.prompt_text %></pre>
+
+  <div class="mt-3 flex items-center gap-2">
+    <!-- Use button -> open new prompt form, prefilled -->
+    <%= link_to "Use", new_prompt_path(prompt: { idea: template.prompt_text }), class: "px-3 py-1 rounded bg-brand text-white" %>
+
+    <!-- Copy -->
+    <a href="#" class="px-3 py-1 border rounded copy-template" data-text="<%= j template.prompt_text %>">Copy</a>
+
+    <!-- Like (button posts to like route) -->
+    <% if user_signed_in? %>
+      <%= button_to "Like (#{template.likes_count})", like_prompt_template_path(template), method: :post, remote: true, class: "px-2 py-1 rounded border text-sm" %>
+    <% else %>
+      <span class="px-2 py-1 text-sm text-gray-400">Likes: <%= template.likes_count %></span>
+    <% end %>
+  </div>
+</div>
