@@ -1,4 +1,14 @@
-<div class="p-4 border rounded bg-white">
+<%# app/views/prompt_templates/_template_card.html.erb %>
+<%# Expects `template` with attributes: title, category, prompt_text, likes_count, tone, format, audience, length %>
+
+<div class="p-4 border rounded bg-white template-card"
+     data-idea="<%= j(template.prompt_text.to_s.truncate(500)) %>"
+     data-category="<%= j(template.category.to_s) %>"
+     data-tone="<%= j(template.respond_to?(:tone) ? template.tone.to_s : '') %>"
+     data-format="<%= j(template.respond_to?(:format) ? template.format.to_s : '') %>"
+     data-audience="<%= j(template.respond_to?(:audience) ? template.audience.to_s : '') %>"
+     data-length="<%= j(template.respond_to?(:length) ? template.length.to_s : '') %>">
+
   <div class="flex justify-between items-start">
     <h3 class="font-medium"><%= template.title %></h3>
     <div class="text-sm text-gray-400"><%= template.category %></div>
@@ -7,8 +17,8 @@
   <pre class="mt-2 whitespace-pre-wrap text-sm text-gray-700"><%= template.prompt_text %></pre>
 
   <div class="mt-3 flex items-center gap-2">
-    <!-- Use button -> open new prompt form, prefilled -->
-    <%= link_to "Use", new_prompt_path(prompt: { idea: template.prompt_text }), class: "px-3 py-1 rounded bg-brand text-white" %>
+    <!-- Use button -> still navigates to new prompt page (fallback), but also has client-side action if the inline form exists -->
+    <%= link_to "Use", new_prompt_path(prompt: { idea: template.prompt_text }), class: "px-3 py-1 rounded bg-brand text-white use-template-link" %>
 
     <!-- Copy -->
     <a href="#" class="px-3 py-1 border rounded copy-template" data-text="<%= j template.prompt_text %>">Copy</a>
