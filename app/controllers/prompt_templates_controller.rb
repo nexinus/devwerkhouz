@@ -28,7 +28,10 @@ class PromptTemplatesController < ApplicationController
     def like
       @template = PromptTemplate.find(params[:id])
       @template.increment!(:likes_count)
-      head :ok
+      respond_to do |format|
+        format.turbo_stream { head :ok } # or return a small partial update
+        format.html { redirect_back fallback_location: prompt_templates_path }
+      end
     end
   
     def categories

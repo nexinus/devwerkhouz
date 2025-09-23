@@ -1,50 +1,132 @@
-<div class="max-w-6xl mx-auto py-8">
-  <h2 class="text-xl font-semibold mb-4">Prompt Library</h2>
+<%# app/views/prompt_templates/index.html.erb %>
+<% categories = defined?(PROMPT_LIBRARY) ? PROMPT_LIBRARY[:categories] : [
+  "Writing & Content", "Marketing & Growth", "Business & Productivity",
+  "Code & Tech", "Learning & Knowledge", "Creative & Design", "Personal & Miscellaneous"
+] %>
 
-  <div class="mb-4 flex gap-2">
-    <%= link_to "All", prompt_templates_path, class: "px-3 py-1 rounded bg-gray-100" %>
-    <% ["Writing","Marketing","Code","Other"].each do |c| %>
-      <%= link_to c, prompt_templates_path(category: c), class: "px-3 py-1 rounded hover:bg-gray-50 #{'bg-brand/10 text-brand' if params[:category]==c}" %>
+<div class="max-w-6xl mx-auto py-8">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-semibold">Prompt Library</h2>
+
+    <div class="flex gap-3 items-center">
+      <%= form_with url: prompt_templates_path, method: :get, local: true, class: "flex items-center gap-2" do |ff| %>
+        <%= ff.text_field :q, value: params[:q], placeholder: "Search templates...", class: "border p-2 rounded w-64", aria: { label: "Search templates" } %>
+        <%= ff.submit "Search", class: "px-3 py-1 rounded bg-gray-100 hover:bg-gray-50" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mb-4 flex gap-2 flex-wrap">
+    <%= link_to "All", prompt_templates_path, class: "px-3 py-1 rounded #{params[:category].blank? ? 'bg-brand/10 text-brand' : 'bg-gray-100'}" %>
+
+    <% categories.each do |c| %>
+      <% active = params[:category].to_s == c %>
+      <%= link_to c, prompt_templates_path(category: c), class: "px-3 py-1 rounded #{active ? 'bg-brand/10 text-brand' : 'bg-gray-100 hover:bg-gray-50'}" %>
     <% end %>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <% @templates.each do |t| %>
-      <div class="p-4 border rounded bg-white">
-        <div class="flex justify-between items-start">
-          <h3 class="font-medium"><%= t.title %></h3>
-          <div class="text-sm text-gray-400"><%= t.category %></div>
-        </div>
-
-        <pre class="mt-2 whitespace-pre-wrap text-sm text-gray-700"><%= t.prompt_text %></pre>
-
-        <div class="mt-3 flex items-center gap-2">
-          <!-- Use: open new prompt form with idea prefilled -->
-          <%= link_to "Use", new_prompt_path(prompt: { idea: t.prompt_text }), class: "px-3 py-1 rounded bg-brand text-white" %>
-
-          <!-- Copy: client-side copy -->
-          <a href="#" class="px-3 py-1 border rounded copy-template" data-text="<%= j t.prompt_text %>">Copy</a>
-
-          <!-- Like: remote post to likes endpoint -->
-          <%= button_to "Like (#{t.likes_count})", like_prompt_template_path(t), method: :post, remote: true, class: "px-2 py-1 rounded border text-sm" %>
-        </div>
+  <div class="mb-6 flex items-center justify-between">
+    <div class="flex gap-2">
+      <%# Presets dropdown if you decide to keep presets.yml later %>
+      <div>
+        <label for="preset-select" class="sr-only">Presets</label>
+        <select id="preset-select" class="border p-2 rounded">
+          <option value="">Quick presets</option>
+          <option value='{"idea":"LinkedIn thought piece","category":"Marketing & Growth","tone":"Professional","format":"Paragraph","audience":"Marketing Managers","length":"medium"}'>LinkedIn Thought Piece</option>
+          <option value='{"idea":"How-to guide on setup","category":"Writing & Content","tone":"Neutral","format":"Steps","audience":"Developers","length":"long"}'>How-to Guide</option>
+          <option value='{"idea":"Short product ad","category":"Marketing & Growth","tone":"Persuasive","format":"Short social post","audience":"General Public","length":"short"}'>Short Product Ad</option>
+        </select>
       </div>
+
+      <button id="apply-preset" class="px-3 py-1 rounded bg-brand text-white">Apply</button>
+    </div>
+
+    <div class="text-sm text-gray-500">Showing <strong><%= @templates.total_count if @templates.respond_to?(:total_count) %></strong> templates</div>
+  </div>
+
+  <div id="templates-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <% @templates.each do |t| %>
+      <%= render partial: "template_card", locals: { template: t } %>
     <% end %>
+  </div>
+
+  <%# Pagination (if you're using kaminari/will_paginate) %>
+  <div class="mt-6">
+    <%= paginate @templates if defined?(paginate) && @templates.respond_to?(:total_pages) %>
   </div>
 </div>
 
 <script>
 document.addEventListener("turbo:load", function() {
+  // COPY: preserve existing behavior — attach to elements with .copy-template
   document.querySelectorAll(".copy-template").forEach(btn=>{
     btn.addEventListener("click", function(e){
       e.preventDefault();
-      const text = this.dataset.text;
+      const text = this.dataset.text || "";
+      if (!navigator.clipboard) {
+        // fallback: open prompt to copy manually
+        window.prompt("Copy the template text below:", text);
+        return;
+      }
       navigator.clipboard.writeText(text).then(()=> {
         const old = this.innerText;
         this.innerText = "Copied";
         setTimeout(()=> this.innerText = old, 1200);
+      }).catch(()=> {
+        window.prompt("Could not copy automatically. Use Ctrl/Cmd+C:", text);
       });
     });
   });
+
+  // USE: prefill inline prompt form if present
+  document.querySelectorAll(".use-template-link").forEach(link=>{
+    link.addEventListener("click", function(e){
+      // find an inline prompt form on the page (textarea[name="prompt[idea]"])
+      const ideaField = document.querySelector('textarea[name="prompt[idea]"]');
+      const categorySelect = document.querySelector('select[name="prompt[category]"]');
+      const toneSelect = document.querySelector('select[name="prompt[tone]"]') || document.getElementById("tone-primary");
+      const formatSelect = document.querySelector('select[name="prompt[format]"]') || document.getElementById("format-primary");
+      const audienceField = document.querySelector('input[name="prompt[audience]"]');
+      const lengthSelect = document.querySelector('select[name="prompt[length]"]');
+
+      // if the form isn't present, let the link work as normal (fallback to new page)
+      if (!ideaField) return true;
+
+      // prevent the link navigation and fill fields from the surrounding card's data attributes
+      e.preventDefault();
+      const card = this.closest(".template-card");
+      if (!card) return;
+
+      const idea = card.dataset.idea || "";
+      const category = card.dataset.category || "";
+      const tone = card.dataset.tone || "";
+      const format = card.dataset.format || "";
+      const audience = card.dataset.audience || "";
+      const length = card.dataset.length || "";
+
+      ideaField.value = idea;
+      if (categorySelect && category) categorySelect.value = category;
+      if (toneSelect && tone) {
+        if (![...toneSelect.options].some(o=>o.value===tone)) {
+          const o = document.createElement("option"); o.value = tone; o.text = tone; toneSelect.appendChild(o);
+        }
+        toneSelect.value = tone;
+      }
+      if (formatSelect && format) {
+        if (![...formatSelect.options].some(o=>o.value===format)) {
+          const o = document.createElement("option"); o.value = format; o.text = format; formatSelect.appendChild(o);
+        }
+        formatSelect.value = format;
+      }
+      if (audienceField && audience) audienceField.value = audience;
+      if (lengthSelect && length) lengthSelect.value = length;
+
+      ideaField.focus();
+      ideaField.scrollIntoView({behavior:"smooth", block:"center"});
+      return false;
+    });
+  });
+
 });
 </script>
+

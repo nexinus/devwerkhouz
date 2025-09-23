@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_14_165028) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_18_071516) do
   create_table "prompt_templates", force: :cascade do |t|
     t.string "title", null: false
     t.text "prompt_text", null: false
@@ -20,8 +20,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_14_165028) do
     t.integer "likes_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "tone"
+    t.string "format"
+    t.string "audience"
+    t.string "length"
     t.index ["author_id"], name: "index_prompt_templates_on_author_id"
     t.index ["category"], name: "index_prompt_templates_on_category"
+    t.index ["public"], name: "index_prompt_templates_on_public"
   end
 
   create_table "prompts", force: :cascade do |t|
