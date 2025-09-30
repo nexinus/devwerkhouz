@@ -3,6 +3,13 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
   helper_method :current_user, :user_signed_in?
 
+  protected
+
+  # Central post-login landing page. Edit here to change where users go after sign-in.
+  def after_sign_in_path_for(resource)
+    dashboard_path
+  end
+
   private
 
   def current_user
@@ -18,6 +25,12 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user!
     return if user_signed_in?
+
+    # store location so we can return after login (safe: only store internal paths)
+    if request.get? && request.fullpath.present?
+      session[:return_to] = request.fullpath if request.fullpath.start_with?('/')
+    end
+
     redirect_to login_path, alert: "Please sign in to continue."
   end
 end

@@ -24,6 +24,21 @@
     <%= javascript_importmap_tags %>
   </head>
 
+  <div id="copy-action-modal" data-controller="prompt-actions" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+    <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg">
+      <h3 class="text-lg font-semibold mb-3">What do you want to do with this prompt?</h3>
+      <p id="cam-prompt-preview" class="whitespace-pre-wrap text-sm mb-4 max-h-40 overflow-auto"></p>
+
+      <div class="flex gap-3">
+        <button data-action="click->prompt-actions#copyToClipboard" id="cam-copy-btn" class="px-3 py-2 rounded bg-brand text-white">Copy to clipboard</button>
+        <button id="cam-open-chatgpt" class="px-3 py-2 rounded border" onclick="window.open('https://chat.openai.com','_blank')">Open ChatGPT (paste manually)</button>
+        <button id="cam-continue" onclick="document.getElementById('copy-action-modal').classList.add('hidden')" class="px-3 py-2 rounded border">Continue working</button>
+      </div>
+
+      <div id="cam-result" class="mt-4 text-sm hidden"></div>
+    </div>
+  </div>
+
   <body class="min-h-screen bg-gray-50 text-gray-900">
   <div id="app" class="flex h-screen overflow-hidden">
     <!-- Sidebar (collapsible) -->

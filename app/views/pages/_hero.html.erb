@@ -1,10 +1,12 @@
 <!-- app/views/pages/_hero.html.erb -->
+<%# Hide hero for logged-in users. Change helper if you use a different auth method %>
+<% unless user_signed_in? %>
 <div class="bg-white">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-12">
+    <div class="flex flex-col lg:flex-row items-center gap-12 py-16">
 
-      <!-- Left: headline + CTA -->
-      <div class="max-w-xl">
+      <!-- Left: headline + benefits + CTA -->
+      <div class="w-full lg:w-1/2 max-w-2xl">
         <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
           The houz for your AI prompts
         </h1>
@@ -13,62 +15,86 @@
           Describe your idea, choose a tone and format, and get a concise, model-ready prompt in seconds.
         </p>
 
-        <div class="mt-6">
-          <%= form_with url: prompts_path, scope: :prompt, method: :post, local: false, class: "flex gap-3 items-start" do |f| %>
-            <%= f.text_field :idea, placeholder: "Type your idea (e.g. 'Blog post about remote work')",
-                 class: "flex-1 border rounded px-3 py-2 focus:ring-2 focus:ring-brand/40" %>
-            <%= f.submit "Generate a Prompt", class: "px-4 py-2 rounded bg-brand text-white hover:bg-brand/80 transition-colors" %>
-          <% end %>
-
-          <div class="md:col-span-2">
-            <div id="prompt-result" class="mt-6">
-              <%= turbo_frame_tag "prompt_show" do %>
-                <%# initial empty state or show @generated_prompt if present %>
-                <% if @generated_prompt.present? %>
-                  <pre class="p-4 bg-gray-100 rounded whitespace-pre-wrap"><%= @generated_prompt %></pre>
-                <% end %>
-              <% end %>
-            </div>
-          </div>
-          
-          <p class="mt-2 text-sm text-gray-500">Try without signing up — sign in to save your prompts.</p>
-        </div>
-
-        <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Benefits / features -->
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex items-start gap-3">
-            <div class="text-brand mt-1">⚡</div>
+            <div class="text-brand mt-1 text-xl">⚡</div>
             <div>
               <p class="text-sm font-medium">Fast</p>
-              <p class="text-sm text-gray-500">Prompts in seconds</p>
+              <p class="text-sm text-gray-500">Generate usable prompts in seconds</p>
             </div>
           </div>
+
           <div class="flex items-start gap-3">
-            <div class="text-brand mt-1">🎯</div>
+            <div class="text-brand mt-1 text-xl">🎯</div>
             <div>
               <p class="text-sm font-medium">Effective</p>
-              <p class="text-sm text-gray-500">Better AI outputs</p>
+              <p class="text-sm text-gray-500">Better inputs → better outputs</p>
             </div>
           </div>
+
           <div class="flex items-start gap-3">
-            <div class="text-brand mt-1">🔒</div>
+            <div class="text-brand mt-1 text-xl">💾</div>
+            <div>
+              <p class="text-sm font-medium">Save & reuse</p>
+              <p class="text-sm text-gray-500">Store favourites and use them again later</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="text-brand mt-1 text-xl">🔒</div>
             <div>
               <p class="text-sm font-medium">Trusted</p>
-              <p class="text-sm text-gray-500">Privacy & Imprint</p>
+              <p class="text-sm text-gray-500">Privacy-first — your prompts stay private</p>
             </div>
+          </div>
+        </div>
+
+        <!-- Centered, larger prompt form -->
+        <div class="mt-8">
+          <div class="mx-auto max-w-2xl">
+            <%= form_with url: prompts_path, scope: :prompt, method: :post, local: false, class: "flex flex-col gap-3" do |f| %>
+              <%= f.text_area :idea,
+                    placeholder: "Type your idea (e.g. 'Write a friendly onboarding email for a new SaaS user')",
+                    rows: 5,
+                    class: "w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-brand/40 text-sm resize-y" %>
+
+              <div class="flex flex-col sm:flex-row gap-3 items-center sm:justify-between">
+                <div class="flex gap-3">
+                  <%= f.submit "Generate a Prompt", class: "px-5 py-2 rounded bg-brand text-white hover:bg-brand/80 transition-colors" %>
+
+                  <%# This button opens ChatGPT in new tab if user wants to paste there %>
+                  <button type="button" onclick="window.open('https://chat.openai.com','_blank')" class="px-4 py-2 rounded border">
+                    Open ChatGPT
+                  </button>
+                </div>
+
+                <p class="text-sm text-gray-500">Try it without signing up — <strong>sign in to save your prompts</strong>.</p>
+              </div>
+
+              <!-- Turbo frame for showing generated prompt centered -->
+              <div id="prompt-result" class="mt-4">
+                <%= turbo_frame_tag "prompt_show" do %>
+                  <% if @generated_prompt.present? %>
+                    <pre class="p-4 bg-gray-50 rounded whitespace-pre-wrap text-sm"><%= @generated_prompt %></pre>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>
 
       <!-- Right: hero artwork -->
-      <div class="flex items-center justify-center">
+      <div class="w-full lg:w-1/2 flex items-center justify-center">
         <!-- Option A: Static abstract illustration (safe, fast) -->
         <%= image_tag "hero_abstract.svg", alt: "Abstract hero illustration", class: "rounded-xl shadow-md w-full max-w-lg" %>
 
         <!-- Option B: Inline animated flow (uncomment to use; recommended if you want motion)
-             Note: Inline preserves SVG animation (SMIL). img tag might not animate in all browsers. -->
+            Note: Inline preserves SVG animation (SMIL). img tag might not animate in all browsers. -->
         <%#= raw(File.read(Rails.root.join("app","assets","images","hero_flow.svg"))) %>
       </div>
-
     </div>
   </div>
 </div>
+<% end %>

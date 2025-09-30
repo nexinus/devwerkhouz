@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "build": "tailwindcss -i ./app/assets/tailwind/application.css -o ./app/assets/builds/tailwind.css --minify"
+    "build": "tailwindcss -i ./app/assets/tailwind/application.css -o ./app/assets/builds/tailwind.css --minify",
+    "start": "node server.js"
   },
   "dependencies": {
     "autoprefixer": "^10.0.0",

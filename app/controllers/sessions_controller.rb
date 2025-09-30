@@ -4,9 +4,17 @@ class SessionsController < ApplicationController
 
   def create
     user = User.find_by(email: params[:email]&.downcase)
+
     if user&.authenticate(params[:password])
       session[:user_id] = user.id
-      redirect_to new_prompt_path, notice: "Signed in successfully."
+
+      # choose the best post-login path:
+      return_to = session.delete(:return_to)
+      if return_to.present? && return_to.start_with?('/')
+        redirect_to return_to, notice: "Signed in successfully."
+      else
+        redirect_to after_sign_in_path_for(user), notice: "Signed in successfully."
+      end
     else
       flash.now[:alert] = "Invalid email or password."
       render :new, status: :unprocessable_entity

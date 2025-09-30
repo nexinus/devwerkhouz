@@ -1,5 +1,6 @@
 class PromptsController < ApplicationController
   before_action :authenticate_user!, only: %i[index show]
+  protect_from_forgery with: :exception
 
   def index
     @prompts = current_user.prompts.order(created_at: :desc).limit(50)
@@ -119,6 +120,30 @@ class PromptsController < ApplicationController
     respond_to do |format|
       format.html
       format.turbo_stream { render partial: "prompts/show_frame", locals: { prompt: @prompt } }
+    end
+  end
+
+  def execute
+    prompt = Prompt.find(params[:id])
+    prompt_text = prompt.generated_prompt.to_s
+
+    begin
+      client = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
+      response = client.chat.completions.create(
+        model: "gpt-4o-mini", # choose your model
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: prompt_text }
+        ],
+        max_tokens: 800
+      )
+
+      assistant_text = response.dig("choices", 0, "message", "content") || "No response."
+
+      render json: { ok: true, assistant: assistant_text }
+    rescue => e
+      Rails.logger.error("OpenAI error: #{e.class} #{e.message}")
+      render json: { ok: false, error: e.message }, status: 500
     end
   end
 

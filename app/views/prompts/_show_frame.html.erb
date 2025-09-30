@@ -4,6 +4,11 @@
 
   <div class="mt-3 flex gap-2 items-center">
     <button class="copy-btn px-3 py-2 rounded bg-brand text-white" data-text="<%= j prompt.generated_prompt %>">Copy</button>
+
+    <button class="execute-btn px-3 py-2 rounded border" data-prompt-id="<%= prompt.id %>" data-text="<%= j prompt.generated_prompt %>">
+      Send to ChatGPT (Execute)
+    </button>
+
     <%= link_to "Edit / Re-run", new_prompt_path(prompt: { idea: prompt.idea, category: prompt.category, tone: prompt.tone, format: prompt.format }), class: "underline" %>
   </div>
 </div>

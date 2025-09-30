@@ -1,0 +1,18 @@
+<div class="max-w-4xl mx-auto py-12">
+  <h1 class="text-3xl font-bold mb-6">Welcome back, <%= current_user.email %>!</h1>
+
+  <!-- Composer -->
+  <%= render "prompts/composer", prompt: @prompt %>
+
+  <!-- Optional: Saved Prompts -->
+  <% if @saved_prompts&.any? %>
+    <h2 class="text-xl font-semibold mb-4">Your Recent Prompts</h2>
+    <ul class="space-y-2">
+      <% @saved_prompts.each do |prompt| %>
+        <li class="p-3 bg-gray-50 rounded shadow-sm">
+          <%= link_to prompt.idea.truncate(60), prompt_path(prompt), class: "underline" %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

@@ -22,6 +22,8 @@ Rails.application.routes.draw do
   post "/login", to: "sessions#create"
   delete "/logout", to: "sessions#destroy", as: :logout
 
+  get '/dashboard', to: 'dashboard#show', as: :dashboard
+
   # Static pages
   get "/privacy", to: "pages#privacy"
   get "/terms", to: "pages#terms"
@@ -31,6 +33,7 @@ Rails.application.routes.draw do
   resources :prompt_templates, only: %i[index show create] do
     member do
       post :like
+      post :execute
     end
     collection do
       get :categories
