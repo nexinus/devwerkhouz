@@ -1,0 +1,15 @@
+<div class="max-w-2xl mx-auto py-16 text-center">
+  <h1 class="text-4xl font-bold mb-6">Welcome to devwerkhouz!</h1>
+
+  <p class="mb-4 text-lg text-gray-700">
+    Here you can generate AI prompts, save your favorites, and reuse them anytime.
+  </p>
+
+  <p class="mb-8 text-gray-500">
+    Click the button below to start using your dashboard and save your first prompt!
+  </p>
+
+  <%= form_with url: complete_welcome_path, method: :post do %>
+    <%= submit_tag "Take me to my dashboard", class: "px-6 py-3 rounded bg-brand text-white hover:bg-brand/80 transition-colors" %>
+  <% end %>
+</div>

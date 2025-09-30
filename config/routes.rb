@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   post "/login", to: "sessions#create"
   delete "/logout", to: "sessions#destroy", as: :logout
 
+  get  '/welcome',           to: 'welcome#show',     as: :welcome
+  post '/welcome/complete',  to: 'welcome#complete', as: :complete_welcome
+
   get '/dashboard', to: 'dashboard#show', as: :dashboard
 
   # Static pages
