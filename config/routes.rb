@@ -27,6 +27,9 @@ Rails.application.routes.draw do
 
   get '/dashboard', to: 'dashboard#show', as: :dashboard
 
+  post '/create-checkout-session', to: 'payments#create_checkout_session'
+  post '/webhook', to: 'payments#webhook'
+
   # Static pages
   get "/privacy", to: "pages#privacy"
   get "/terms", to: "pages#terms"
