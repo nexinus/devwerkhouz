@@ -24,11 +24,28 @@
 # Any libraries that use a connection pool or another resource pool should
 # be configured to provide at least as many connections as the number of
 # threads. This includes Active Record's `pool` parameter in `database.yml`.
-threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
-threads threads_count, threads_count
+# Threads: the min and max pool sizes. Use environment variables for flexibility.
+max_threads_count = ENV.fetch("RAILS_MAX_THREADS") { 5 }.to_i
+min_threads_count = ENV.fetch("RAILS_MIN_THREADS") { max_threads_count }.to_i
+threads min_threads_count, max_threads_count
 
-# Specifies the `port` that Puma will listen on to receive requests; default is 3000.
-port ENV.fetch("PORT", 3000)
+# Specifies the `port` that Puma will listen on to receive requests.
+# Use ENV['PORT'] (Render sets this, e.g. 4242). Fall back to 3000 for local dev.
+port ENV.fetch("PORT") { 3000 }
+
+# Bind to all interfaces so Render's port scanner can reach Puma.
+# This explicitly instructs Puma to listen on 0.0.0.0:$PORT.
+bind "tcp://0.0.0.0:#{ENV.fetch('PORT') { 3000 }}"
+
+# Specifies the `environment` that Puma will run in.
+environment ENV.fetch("RAILS_ENV") { "development" }
+
+# Workers: only use multiple workers in production by default.
+# Leave commented or remove if you don't want clustered workers in production.
+if ENV.fetch("RAILS_ENV") { "development" } == "production"
+  workers ENV.fetch("WEB_CONCURRENCY") { 2 }
+  preload_app!
+end
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
