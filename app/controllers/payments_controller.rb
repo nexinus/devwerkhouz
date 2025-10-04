@@ -4,6 +4,8 @@ class PaymentsController < ApplicationController
   
     # POST /create-checkout-session
     def create_checkout_session
+      Stripe.api_key = ENV['STRIPE_SECRET_KEY']
+      
       price_id = params[:priceId] || 'price_1SATZaIoRaH50WhR5sShQueN' # <-- use your price id
       # Optionally accept customer_email: params[:customerEmail]
   

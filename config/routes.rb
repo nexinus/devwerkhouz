@@ -27,6 +27,8 @@ Rails.application.routes.draw do
 
   get '/dashboard', to: 'dashboard#show', as: :dashboard
 
+  get '/pricing', to: 'pages#pricing', as: :pricing
+
   post '/create-checkout-session', to: 'payments#create_checkout_session'
   post '/webhook', to: 'payments#webhook'
 

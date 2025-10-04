@@ -8,6 +8,9 @@ class PagesController < ApplicationController
     @sample_prompts = current_user.prompts.order(created_at: :desc).limit(3) if user_signed_in?
   end
 
+  def pricing
+  end
+
   def privacy; end
   def terms; end
   def impressum; end
