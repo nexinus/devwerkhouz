@@ -14,8 +14,8 @@ class PaymentsController < ApplicationController
         payment_method_types: ['card'],
         line_items: [{ price: price_id, quantity: 1 }],
         allow_promotion_codes: true,
-        success_url: "#{ENV['BASE_URL']}/success.html?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url: "#{ENV['BASE_URL']}/cancel.html"
+        success_url: "#{ENV['BASE_URL']}/success?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url: "#{ENV['BASE_URL']}/cancel"
       )
   
       render json: { id: session.id, url: session.url }
@@ -60,12 +60,11 @@ class PaymentsController < ApplicationController
 
     # Serve the static success page
     def success
-      render file: Rails.root.join('public', 'success.html'), layout: false
+      @session_id = params[:session_id]
     end
 
     # Serve the static cancel page
     def cancel
-      render file: Rails.root.join('public', 'cancel.html'), layout: false
     end
   end
   
