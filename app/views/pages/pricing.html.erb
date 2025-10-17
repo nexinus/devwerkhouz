@@ -1,5 +1,5 @@
 <%# Optional: set a page title for layout %>
-<% content_for :title, "Pricing — DevWerkhouz" %>
+<% content_for :title, "Pricing — devwerkhouz" %>
 
 <section class="bg-neutral-50 min-h-screen flex items-center justify-center py-12">
   <div class="w-full max-w-4xl px-6">
@@ -22,7 +22,8 @@
         <div class="mt-auto">
           <button id="checkout-button"
                   data-price-id="<%= ENV['STRIPE_PRICE_ID'] || 'price_1SATZaIoRaH50WhR5sShQueN' %>"
-                  class="w-full inline-block px-6 py-3 bg-accent-orange hover:bg-accent-orange-dark text-white font-bold rounded-lg shadow-orange-strong transition-colors disabled:opacity-60">
+                  style="box-shadow: 0 6px 18px rgba(230,90,0,0.12)"
+                  class="w-full inline-block px-6 py-3 bg-orange-600 hover:bg-orange-600 text-white font-bold rounded-lg shadow-lg transition-colors disabled:opacity-60">
             Subscribe
           </button>
 
@@ -51,50 +52,81 @@
 <meta name="stripe-pk" content="<%= ENV['STRIPE_PUBLISHABLE_KEY'] || Rails.application.credentials.dig(:stripe, :public_key) %>">
 
 <%= javascript_tag do %>
-  document.addEventListener('DOMContentLoaded', () => {
-    const pk = document.querySelector('meta[name="stripe-pk"]').content;
-    if (!pk) {
-      console.warn('Stripe publishable key not set (STRIPE_PUBLISHABLE_KEY)');
-      return;
+  (function () {
+    // read CSRF token from meta tag (if present)
+    function csrfToken() {
+      var m = document.querySelector("meta[name='csrf-token']");
+      return m ? m.content : null;
     }
-    const stripe = Stripe(pk);
 
-    const checkoutBtn = document.getElementById('checkout-button');
-    if (!checkoutBtn) return;
+    async function ajaxCreateCheckout(priceId) {
+      var url = "<%= create_checkout_session_path %>";
 
-    checkoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      checkoutBtn.disabled = true;
-      checkoutBtn.innerText = 'Preparing…';
+      var headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+      var token = csrfToken();
+      if (token) headers["X-CSRF-Token"] = token;
 
-      const priceId = checkoutBtn.dataset.priceId;
+      var resp = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ priceId: priceId })
+      });
 
-      try {
-        const resp = await fetch('<%= create_checkout_session_path %>', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-Token': document.querySelector("meta[name='csrf-token']").content
-          },
-          body: JSON.stringify({ priceId })
-        });
+      var json = {};
+      try { json = await resp.json(); } catch(e) { /* ignore */ }
 
-        const data = await resp.json();
-
-        if (resp.ok && data.url) {
-          window.location.href = data.url;
-        } else {
-          alert(data.error || 'Error creating checkout session');
-          checkoutBtn.disabled = false;
-          checkoutBtn.innerText = 'Subscribe';
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Network error while creating checkout session');
-        checkoutBtn.disabled = false;
-        checkoutBtn.innerText = 'Subscribe';
+      if (!resp.ok) {
+        var msg = json.error || ("HTTP " + resp.status);
+        throw new Error(msg);
       }
+
+      return json;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      var btn = document.getElementById("checkout-button");
+      if (!btn) {
+        console.warn("checkout-button not found on page");
+        return;
+      }
+
+      btn.addEventListener("click", async function (ev) {
+        ev.preventDefault();
+        try {
+          btn.disabled = true;
+          btn.dataset.origText = btn.innerText;
+          btn.innerText = "Preparing…";
+
+          var priceId = btn.dataset.priceId;
+          if (!priceId) throw new Error("Missing price id on button dataset");
+
+          var result = await ajaxCreateCheckout(priceId);
+
+          // prefer a server-provided redirect URL (Stripe newer API returns url)
+          if (result && result.url) {
+            window.location.href = result.url;
+            return;
+          }
+
+          // fallback: older API might return session id only
+          if (result && result.id) {
+            // if you want to use client side stripe.redirectToCheckout you'd need pk
+            // but simplest fallback: open Checkout hosted page via server route if available
+            window.location.href = "/checkout/" + result.id;
+            return;
+          }
+
+          throw new Error("Invalid response from server");
+        } catch (err) {
+          console.error("Checkout error:", err);
+          alert(err.message || "Error creating checkout session. See console for details.");
+          btn.disabled = false;
+          btn.innerText = btn.dataset.origText || "Subscribe";
+        }
+      });
     });
-  });
+  })();
 <% end %>

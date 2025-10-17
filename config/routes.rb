@@ -32,6 +32,14 @@ Rails.application.routes.draw do
   post '/create-checkout-session', to: 'payments#create_checkout_session'
   post '/webhook', to: 'payments#webhook'
 
+  # config/routes.rb
+  get '/success', to: 'payments#success'
+  get '/cancel',  to: 'payments#cancel'
+
+  # Also map the .html URLs Stripe might use:
+  get '/success.html', to: 'payments#success'
+  get '/cancel.html',  to: 'payments#cancel'
+
   # Static pages
   get "/privacy", to: "pages#privacy"
   get "/terms", to: "pages#terms"

@@ -57,5 +57,15 @@ class PaymentsController < ApplicationController
   
       render json: { received: true }
     end
+
+    # Serve the static success page
+    def success
+      render file: Rails.root.join('public', 'success.html'), layout: false
+    end
+
+    # Serve the static cancel page
+    def cancel
+      render file: Rails.root.join('public', 'cancel.html'), layout: false
+    end
   end
   
