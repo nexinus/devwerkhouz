@@ -1,31 +1,51 @@
 <div class="flex items-center justify-between h-12 md:h-16 px-4 relative overflow-visible">
   <div class="flex items-center gap-4">
-
     <!-- brand / logo area -->
-    <!-- responsive logo: small inline on mobile, large absolute on md+ -->
     <div class="flex items-center gap-3 flex-shrink-0">
-      <!-- small inline logo (mobile) -->
+      <!-- mobile logo -->
       <%= link_to root_path, class: "block md:hidden" do %>
         <%= image_tag "dwh_fullname.png", alt: "devwerkhouz",
           class: "h-8 w-auto object-contain" %>
       <% end %>
     </div>
 
-    <!-- Large absolute logo for md+ screens (positioned relative to the header container) -->
+    <!-- desktop logo -->
     <%= link_to root_path, class: "hidden md:block absolute left-[10px] top-1/2 -translate-y-1/2 z-20 pointer-events-auto" do %>
       <%= image_tag "dwh_fullname.png", alt: "devwerkhouz",
         class: "h-[140px] w-auto object-contain" %>
     <% end %>
   </div>
 
+  <!-- user nav -->
   <div class="flex items-center gap-3">
     <% if user_signed_in? %>
-      <span class="text-sm text-gray-700 hidden md:inline">Hi, <%= current_user.name %></span>
-      <%= button_to "Sign out", logout_path, method: :delete,
+      <span class="text-sm text-gray-700 hidden md:inline">Hi, <%= current_user.name.presence || current_user.email %></span>
+
+      <%= link_to "Edit account",
+            edit_user_registration_path,
+            class: "hidden sm:inline-block text-sm px-3 py-2 rounded border hover:bg-gray-50 transition" %>
+
+      <%= button_to "Sign out",
+            destroy_user_session_path,
+            method: :delete,
+            form: { class: "inline" },
             class: "px-3 py-2 text-sm bg-brand text-white rounded inline-flex items-center justify-center h-9 cursor-pointer transition transform hover:bg-brand/80 hover:scale-105 hover:shadow-sm" %>
     <% else %>
-      <%= link_to "Sign in", login_path, class: "text-sm px-3 py-2 rounded hover:text-brand transition-colors duration-150 inline-flex items-center h-9" %>
-      <%= link_to "Sign up", signup_path, class: "text-sm px-3 py-2 rounded bg-brand text-white hover:bg-brand/80 transition-colors duration-150 inline-flex items-center h-9" %>
+      <%= link_to "Sign in",
+            new_user_session_path,
+            class: "text-sm px-3 py-2 rounded hover:text-brand transition-colors duration-150 inline-flex items-center h-9" %>
+
+      <%= link_to "Sign up",
+            new_user_registration_path,
+            class: "text-sm px-3 py-2 rounded bg-brand text-white hover:bg-brand/80 transition-colors duration-150 inline-flex items-center h-9" %>
+
+      <%# Optional: Google OAuth (only if omniauth-google-oauth2 is configured) %>
+      <% if respond_to?(:user_google_oauth2_omniauth_authorize_path) %>
+        <%= link_to "Sign in with Google",
+              user_google_oauth2_omniauth_authorize_path,
+              class: "text-sm px-3 py-2 rounded border hover:bg-gray-50 transition inline-flex items-center h-9",
+              data: { turbo: false } %>
+      <% end %>
     <% end %>
   </div>
 </div>

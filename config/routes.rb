@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks' }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -37,8 +38,8 @@ Rails.application.routes.draw do
   get '/cancel',  to: 'payments#cancel'
 
   # Also map the .html URLs Stripe might use:
-  get '/success.html', to: 'payments#success'
-  get '/cancel.html',  to: 'payments#cancel'
+  get "/success", to: "payments#success", as: :payment_success
+  get "/cancel", to: "payments#cancel", as: :payment_cancel
 
   # Static pages
   get "/privacy", to: "pages#privacy"
