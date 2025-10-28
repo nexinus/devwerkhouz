@@ -1,31 +1,39 @@
-<section class="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#071027] to-[#0b1220] text-white px-6 py-20">
-  <div class="w-full max-w-2xl bg-white/5 border border-white/10 rounded-2xl p-10 shadow-2xl backdrop-blur">
+<% content_for :title, "Payment Canceled — devwerkhouz" %>
+
+<section class="min-h-screen flex items-center justify-center bg-neutral-50 text-neutral-800 px-6 py-20">
+  <div class="w-full max-w-2xl bg-white border border-neutral-200 rounded-2xl p-10 shadow-orange-soft">
+
     <header class="flex items-center gap-4 mb-6">
-      <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-600 to-rose-700 flex items-center justify-center font-bold text-lg">DW</div>
       <div>
-        <p class="text-sm text-gray-400 uppercase tracking-wide">devwerkhouz</p>
-        <h1 class="text-2xl font-semibold text-red-400">Payment Canceled</h1>
+        <h1 class="text-2xl font-semibold text-neutral-800">Payment canceled</h1>
       </div>
     </header>
 
     <div class="flex items-center justify-center my-8">
-      <div class="w-24 h-24 rounded-full border-4 border-red-700/30 flex items-center justify-center bg-gradient-to-b from-[#0b1220] to-[#071027]">
+      <div class="w-24 h-24 rounded-full border-4 border-accent-orange/30 flex items-center justify-center bg-neutral-50">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-          <path d="M6 6l12 12M18 6l-12 12" stroke="#F87171" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 6l12 12M18 6L6 18" stroke="#E65A00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
     </div>
 
-    <p class="text-center text-gray-300 leading-relaxed mb-8">
-      Your payment has been canceled. No worries — you can try again anytime when you're ready to upgrade your plan.
+    <p class="text-center text-neutral-600 leading-relaxed mb-8">
+      The payment was not completed. No charges were made. You can try again or return to your account to update your details.
     </p>
 
-    <div class="flex justify-center">
-      <%= link_to "Return to Pricing", pricing_path, class: "px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl font-semibold hover:opacity-90 transition" %>
+    <div class="flex justify-center gap-4">
+      <% pr = (defined?(pricing_path) ? pricing_path : '/pricing') %>
+      <% acct = (defined?(account_path) ? account_path : root_path) %>
+
+      <%= link_to "Try again", pr,
+          class: "px-6 py-3 bg-brand from-brand to-accent-orange text-white font-semibold rounded-xl shadow-orange-strong hover:opacity-90 transition" %>
+
+      <%= link_to "Go to my account", acct,
+          class: "px-6 py-3 border border-neutral-200 rounded-xl text-neutral-700 hover:border-accent-orange hover:text-accent-orange transition" %>
     </div>
 
-    <div class="text-center text-sm text-gray-500 mt-8">
-      If you faced a technical issue, please contact <a href="mailto:devwerkhouz.team@gmail.com" class="underline hover:text-white">devwerkhouz.team@gmail.com</a>.
+    <div class="text-center text-sm text-neutral-500 mt-8">
+      Questions? Email <a href="mailto:devwerkhouz.team@gmail.com" class="underline text-accent-orange hover:text-accent-orange-dark transition">devwerkhouz.team@gmail.com</a>.
     </div>
   </div>
 </section>
