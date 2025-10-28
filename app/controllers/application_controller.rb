@@ -27,7 +27,7 @@ class ApplicationController < ActionController::Base
   # Wrap authentication behavior so this controller works both while you're migrating
   # and after Devise is fully wired. If Devise is installed, call its `authenticate_user!`.
   # Otherwise, fall back to your old session-based redirect.
-  def authenticate_user!
+  def authenticate_user!(*_args)
     # If Devise is loaded, call Devise's authenticate_user! (it will redirect as needed).
     if defined?(Devise)
       # store location for Devise after sign in if this is a safe GET to an internal path
@@ -36,7 +36,7 @@ class ApplicationController < ActionController::Base
       end
 
       # call Devise's own authenticate_user!
-      super
+      super()
     else
       # fallback to original session-based auth while migrating
       return if user_signed_in_fallback?
