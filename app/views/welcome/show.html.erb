@@ -1,15 +1,26 @@
-<div class="max-w-2xl mx-auto py-16 text-center">
-  <h1 class="text-4xl font-bold mb-6">Welcome to devwerkhouz!</h1>
+<div class="max-w-2xl mx-auto py-16 text-center px-4">
+  <h1 class="text-4xl font-extrabold mb-3 text-neutral-900">Welcome to devwerkhouz!</h1>
 
-  <p class="mb-4 text-lg text-gray-700">
+  <%# Tagline (subtle) %>
+  <p class="text-sm uppercase tracking-wide text-neutral-500 mb-6">first here, then there</p>
+
+  <p class="mb-4 text-lg text-neutral-700">
     Here you can generate AI prompts, save your favorites, and reuse them anytime.
   </p>
 
-  <p class="mb-8 text-gray-500">
+  <p class="mb-8 text-neutral-500">
     Click the button below to start using your dashboard and save your first prompt!
   </p>
 
-  <%= form_with url: complete_welcome_path, method: :post do %>
-    <%= submit_tag "Take me to my dashboard", class: "px-6 py-3 rounded bg-brand text-white hover:bg-brand/80 transition-colors" %>
-  <% end %>
+  <div class="flex justify-center">
+    <%= button_to "Take me to my dashboard",
+          complete_welcome_path,
+          method: :post,
+          class: "px-6 py-3 rounded-lg bg-brand text-white hover:bg-brand/80 transition-colors shadow" %>
+  </div>
+
+  <%# small note %>
+  <p class="mt-6 text-xs text-neutral-500">
+    You can always revisit this page under Settings → Welcome.
+  </p>
 </div>

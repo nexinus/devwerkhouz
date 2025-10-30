@@ -11,7 +11,7 @@ class ApplicationController < ActionController::Base
 
   # Central post-login landing page. Edit here to change where users go after sign-in.
   def after_sign_in_path_for(resource)
-    stored_location_for(resource) || dashboard_path
+    stored_location_for(resource) || welcome_path
   end
 
   # Permit extra attributes through Devise strong-params.

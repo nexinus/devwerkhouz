@@ -14,7 +14,7 @@ class WelcomeController < ApplicationController
     if return_to.present? && return_to.start_with?('/')
       redirect_to return_to, notice: "You're all set — welcome!"
     else
-      redirect_to after_sign_in_path_for(current_user), notice: "You're all set — welcome!"
+      redirect_to dashboard_path, notice: "You're all set — welcome!"
     end
   end
 end
