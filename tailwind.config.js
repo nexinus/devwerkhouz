@@ -3,18 +3,21 @@ module.exports = {
     "./app/views/**/*.erb",
     "./app/helpers/**/*.rb",
     "./app/javascript/**/*.{js,jsx,ts,tsx}",
-    "./app/assets/tailwind/**/*.css",
-    "./app/assets/stylesheets/**/*.css",
     "./app/assets/builds/**/*.css"
   ],
   safelist: [
+    // Sidebar collapsible states
     "sidebar-open:w-64", "sidebar-closed:w-16",
+    
+    // Brand colors
     "bg-brand", "text-brand", "bg-brand/10", "bg-brand-10",
     "hover:bg-brand/80", "focus:ring-brand",
 
-    // added safelist for orange & neutral utilities you might toggle dynamically
+    // Accent orange colors and shadows (required by spec)
     "bg-accent-orange", "bg-accent-orange-dark", "hover:bg-accent-orange-dark",
     "ring-accent-orange", "shadow-orange-soft", "shadow-orange-strong",
+    
+    // Neutral colors (required by spec)
     "text-neutral-700", "text-neutral-600", "bg-neutral-50", "bg-neutral-100"
   ],
   theme: {
