@@ -39,25 +39,21 @@
     </div>
   </div>
 
-  <body class="min-h-screen bg-gray-50 text-gray-900">
-  <div id="app" class="flex h-screen overflow-hidden">
+  <body class="min-h-screen bg-neutral-50 text-neutral-900">
+  <!-- Header (fixed) -->
+  <%= render 'shared/header' %>
+  
+  <div id="app" class="flex h-screen overflow-hidden pt-14">
     <!-- Sidebar (collapsible) -->
     <%= render 'shared/sidebar' %>
 
-    <!-- Main area (header + content + footer inside a vertical column) -->
-    <div class="flex-1 flex flex-col min-h-0">
-      <!-- Header -->
-      <header class="border-b bg-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <%= render 'shared/header' %>
-        </div>
-      </header>
-
+    <!-- Main area (content + footer inside a vertical column) -->
+    <div id="main-content" class="flex-1 flex flex-col min-h-0 overflow-hidden ml-64 transition-all duration-200">
       <!-- Content area -->
       <main id="main" class="flex-1 overflow-auto">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <% flash.each do |key, message| %>
-            <div class="mb-3 p-3 rounded text-sm <%= key == 'notice' ? 'bg-brand/10 text-brand' : 'bg-red-50 text-red-800' %>">
+            <div class="mb-4 p-3 rounded-lg text-sm <%= key == 'notice' ? 'bg-brand/10 text-brand border border-brand/20' : 'bg-red-50 text-red-800 border border-red-200' %>">
               <%= message %>
             </div>
           <% end %>
@@ -67,11 +63,7 @@
       </main>
 
       <!-- Footer -->
-      <footer class="border-t bg-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <%= render 'shared/footer' %>
-        </div>
-      </footer>
+      <%= render 'shared/footer' %>
     </div>
   </div>
 
@@ -90,8 +82,6 @@
       const labelNodes = () => Array.from(document.querySelectorAll('[data-label]'));
       const newTop = document.getElementById('newPromptTop');
       const newCompact = document.getElementById('newPromptCompact');
-      const newBottom = document.getElementById('newPromptBottom');
-      const historyEl = document.getElementById('sidebarHistory');
 
       function isOpen() {
         return localStorage.getItem(SIDEBAR_KEY) !== 'false';
@@ -106,9 +96,16 @@
       function applyState() {
         if (!sidebar) return;
 
+        // Adjust main content margin when sidebar is collapsed
+        const mainContent = document.getElementById('main-content');
+        
         if (isOpen()) {
-          sidebar.classList.remove('w-20','w-16');
+          sidebar.classList.remove('w-16');
           sidebar.classList.add('w-64');
+          if (mainContent) {
+            mainContent.classList.remove('ml-16');
+            mainContent.classList.add('ml-64');
+          }
 
           root?.classList.remove('sidebar-closed');
           root?.classList.add('sidebar-open');
@@ -117,13 +114,13 @@
 
           if (newTop) newTop.classList.remove('hidden');
           if (newCompact) newCompact.classList.add('hidden');
-
-          if (newBottom) newBottom.classList.remove('hidden');
-
-          if (historyEl) historyEl.classList.remove('hidden');
         } else {
           sidebar.classList.remove('w-64');
-          sidebar.classList.add('w-20');
+          sidebar.classList.add('w-16');
+          if (mainContent) {
+            mainContent.classList.remove('ml-64');
+            mainContent.classList.add('ml-16');
+          }
 
           root?.classList.remove('sidebar-open');
           root?.classList.add('sidebar-closed');
@@ -132,10 +129,6 @@
 
           if (newTop) newTop.classList.add('hidden');
           if (newCompact) newCompact.classList.remove('hidden');
-
-          if (newBottom) newBottom.classList.add('hidden');
-
-          if (historyEl) historyEl.classList.add('hidden');
         }
       }
 
@@ -148,13 +141,27 @@
       if (collapseBtn) collapseBtn.addEventListener('click', toggleSidebar);
       window.toggleSidebar = toggleSidebar;
 
+      // On mobile, default to closed sidebar
       if (window.innerWidth < 768 && localStorage.getItem(SIDEBAR_KEY) === null) {
         localStorage.setItem(SIDEBAR_KEY, 'false');
       }
 
+      // Hide sidebar on mobile by default
+      if (window.innerWidth < 768) {
+        sidebar.classList.add('hidden');
+      }
+
       document.addEventListener('DOMContentLoaded', applyState);
       document.addEventListener('turbo:load', applyState);
-      window.addEventListener('resize', applyState);
+      window.addEventListener('resize', function() {
+        applyState();
+        // Show/hide sidebar on mobile
+        if (window.innerWidth < 768) {
+          sidebar.classList.add('hidden');
+        } else {
+          sidebar.classList.remove('hidden');
+        }
+      });
     })();
   </script>
 

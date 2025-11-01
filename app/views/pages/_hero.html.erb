@@ -1,100 +1,96 @@
-<!-- app/views/pages/_hero.html.erb -->
-<%# Hide hero for logged-in users. Change helper if you use a different auth method %>
+<!-- ChatGPT-like centered composer: card with large textarea, minimal design -->
 <% unless user_signed_in? %>
-<div class="bg-white">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="flex flex-col lg:flex-row items-center gap-12 py-16">
+  <div class="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] py-12 px-4">
+    <!-- Hero headline -->
+    <div class="text-center mb-8 max-w-2xl">
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-neutral-900 mb-4">
+        The houz for your AI prompts
+      </h1>
+      <p class="text-lg text-neutral-600 max-w-xl mx-auto">
+        Describe your idea and get a concise, model-ready prompt in seconds. Save and reuse your favorites.
+      </p>
+    </div>
 
-      <!-- Left: headline + benefits + CTA -->
-      <div class="w-full lg:w-1/2 max-w-2xl">
-        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
-          The houz for your AI prompts
-        </h1>
-
-        <p class="mt-4 text-lg text-gray-600">
-          Describe your idea, choose a tone and format, and get a concise, model-ready prompt in seconds.
-        </p>
-
-        <!-- Benefits / features -->
-        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="flex items-start gap-3">
-            <div class="text-brand mt-1 text-xl">⚡</div>
-            <div>
-              <p class="text-sm font-medium">Fast</p>
-              <p class="text-sm text-gray-500">Generate usable prompts in seconds</p>
-            </div>
+    <!-- Centered composer card -->
+    <div class="w-full max-w-3xl">
+      <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 md:p-8">
+        <!-- Prompt composer form -->
+        <%= form_with url: prompts_path, scope: :prompt, method: :post, local: false, class: "flex flex-col gap-4" do |f| %>
+          <div class="relative">
+            <%= f.text_area :idea,
+                  placeholder: "Type your idea here... (e.g. 'Write a friendly onboarding email for a new SaaS user')",
+                  rows: 8,
+                  minlength: 10,
+                  class: "w-full border border-neutral-300 rounded-lg px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange resize-y min-h-[200px] transition-colors",
+                  aria: { label: "Prompt idea input" } %>
           </div>
 
-          <div class="flex items-start gap-3">
-            <div class="text-brand mt-1 text-xl">🎯</div>
-            <div>
-              <p class="text-sm font-medium">Effective</p>
-              <p class="text-sm text-gray-500">Better inputs → better outputs</p>
+          <!-- Actions row -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+            <div class="flex gap-3">
+              <%= f.submit "Generate Prompt", 
+                    class: "px-6 py-3 rounded-lg bg-accent-orange text-white font-medium hover:bg-accent-orange-dark transition-colors focus:outline-none focus:ring-2 focus:ring-accent-orange focus:ring-offset-2 shadow-orange-soft disabled:opacity-60 disabled:cursor-not-allowed",
+                    data: { disable_with: "Generating..." } %>
+              
+              <button type="button" 
+                      onclick="window.open('https://chat.openai.com','_blank')" 
+                      class="px-4 py-3 rounded-lg border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-300">
+                Open ChatGPT
+              </button>
             </div>
+
+            <p class="text-sm text-neutral-500 text-center sm:text-right">
+              Try it free — <strong class="text-neutral-700">sign in to save prompts</strong>
+            </p>
           </div>
 
-          <div class="flex items-start gap-3">
-            <div class="text-brand mt-1 text-xl">💾</div>
-            <div>
-              <p class="text-sm font-medium">Save & reuse</p>
-              <p class="text-sm text-gray-500">Store favourites and use them again later</p>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3">
-            <div class="text-brand mt-1 text-xl">🔒</div>
-            <div>
-              <p class="text-sm font-medium">Trusted</p>
-              <p class="text-sm text-gray-500">Privacy-first — your prompts stay private</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Centered, larger prompt form -->
-        <div class="mt-8">
-          <div class="mx-auto max-w-2xl">
-            <%= form_with url: prompts_path, scope: :prompt, method: :post, local: false, class: "flex flex-col gap-3" do |f| %>
-              <%= f.text_area :idea,
-                    placeholder: "Type your idea (e.g. 'Write a friendly onboarding email for a new SaaS user')",
-                    rows: 5,
-                    class: "w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-brand/40 text-sm resize-y" %>
-
-              <div class="flex flex-col sm:flex-row gap-3 items-center sm:justify-between">
-                <div class="flex gap-3">
-                  <%= f.submit "Generate a Prompt", class: "px-5 py-2 rounded bg-brand text-white hover:bg-brand/80 transition-colors" %>
-
-                  <%# This button opens ChatGPT in new tab if user wants to paste there %>
-                  <button type="button" onclick="window.open('https://chat.openai.com','_blank')" class="px-4 py-2 rounded border">
-                    Open ChatGPT
-                  </button>
+          <!-- Generated prompt result area -->
+          <div id="prompt-result" class="mt-6">
+            <%= turbo_frame_tag "prompt_show" do %>
+              <% if @generated_prompt.present? %>
+                <div class="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-semibold text-neutral-700">Generated Prompt</h3>
+                    <button 
+                      type="button"
+                      onclick="navigator.clipboard.writeText('<%= j @generated_prompt %>').then(() => alert('Copied!'))"
+                      class="px-3 py-1 text-xs text-accent-orange hover:text-accent-orange-dark font-medium"
+                      aria-label="Copy prompt"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <pre class="whitespace-pre-wrap text-sm text-neutral-700 leading-relaxed"><%= @generated_prompt %></pre>
                 </div>
-
-                <p class="text-sm text-gray-500">Try it without signing up — <strong>sign in to save your prompts</strong>.</p>
-              </div>
-
-              <!-- Turbo frame for showing generated prompt centered -->
-              <div id="prompt-result" class="mt-4">
-                <%= turbo_frame_tag "prompt_show" do %>
-                  <% if @generated_prompt.present? %>
-                    <pre class="p-4 bg-gray-50 rounded whitespace-pre-wrap text-sm"><%= @generated_prompt %></pre>
-                  <% end %>
-                <% end %>
-              </div>
+              <% end %>
             <% end %>
           </div>
-        </div>
+        <% end %>
       </div>
 
-      <!-- Right: hero artwork -->
-      <div class="w-full lg:w-1/2 flex items-center justify-center">
-        <!-- Option A: Static abstract illustration (safe, fast) -->
-        <%= image_tag "hero_abstract.svg", alt: "Abstract hero illustration", class: "rounded-xl shadow-md w-full max-w-lg" %>
-
-        <!-- Option B: Inline animated flow (uncomment to use; recommended if you want motion)
-            Note: Inline preserves SVG animation (SMIL). img tag might not animate in all browsers. -->
-        <%#= raw(File.read(Rails.root.join("app","assets","images","hero_flow.svg"))) %>
+      <!-- Benefits/features (subtle, below composer) -->
+      <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div class="p-4">
+          <div class="text-2xl mb-2">⚡</div>
+          <p class="text-sm font-medium text-neutral-700">Fast</p>
+          <p class="text-xs text-neutral-500">Seconds to generate</p>
+        </div>
+        <div class="p-4">
+          <div class="text-2xl mb-2">🎯</div>
+          <p class="text-sm font-medium text-neutral-700">Effective</p>
+          <p class="text-xs text-neutral-500">Better outputs</p>
+        </div>
+        <div class="p-4">
+          <div class="text-2xl mb-2">💾</div>
+          <p class="text-sm font-medium text-neutral-700">Save & reuse</p>
+          <p class="text-xs text-neutral-500">Store favorites</p>
+        </div>
+        <div class="p-4">
+          <div class="text-2xl mb-2">🔒</div>
+          <p class="text-sm font-medium text-neutral-700">Private</p>
+          <p class="text-xs text-neutral-500">Your data stays safe</p>
+        </div>
       </div>
     </div>
   </div>
-</div>
 <% end %>

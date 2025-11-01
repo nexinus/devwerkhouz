@@ -1,76 +1,94 @@
-<aside id="sidebar" class="bg-white text-gray-900 border-r flex-shrink-0 transition-all duration-200 ease-in-out w-64">
-  <div class="h-full flex flex-col">
-
-    <!-- TOP: logo + collapse button -->
-    <div class="flex items-center justify-between px-3 py-3">
-      <div class="flex items-center gap-3">
-        <%= link_to root_path, class: "flex items-center gap-3" do %>
-          <img src="<%= asset_path('logo.png') %>" alt="logo" class="h-8 w-8 object-contain"/>
+<!-- ChatGPT-like collapsible sidebar: icons + labels, responsive -->
+<aside id="sidebar" class="fixed left-0 top-14 bottom-0 bg-white border-r border-neutral-200 flex-shrink-0 transition-all duration-200 ease-in-out w-64 z-40 overflow-hidden flex flex-col">
+  <div class="h-full flex flex-col overflow-hidden">
+    <!-- New prompt button (top) -->
+    <div class="px-3 pt-4 pb-3 border-b border-neutral-100">
+      <div id="newPromptTop" class="w-full">
+        <%= link_to new_prompt_path, 
+              class: "flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-accent-orange text-white font-medium hover:bg-accent-orange-dark transition-colors focus:outline-none focus:ring-2 focus:ring-accent-orange focus:ring-offset-2 shadow-orange-soft",
+              title: "New prompt" do %>
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span data-label class="text-sm">New prompt</span>
         <% end %>
       </div>
 
-      <!-- collapse button (top-right) -->
-      <button id="sidebarCollapseBtn" aria-label="Collapse sidebar" class="p-1 rounded hover:bg-gray-100 focus:outline-none">
-        <svg class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             xmlns="http://www.w3.org/2000/svg"><path stroke-width="2" d="M6 18L18 6M6 6h12v12"/></svg>
-      </button>
-    </div>
-
-    <!-- New prompt (top) - big button when open; small icon when closed -->
-    <div class="px-3">
-      <div id="newPromptTop" class="mb-3">
-        <%= link_to new_prompt_path, class: "flex items-center gap-3 w-full px-3 py-2 rounded bg-brand text-white hover:bg-brand/80", title: "New prompt" do %>
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg>
-          <span data-label class="font-medium">New prompt</span>
+      <!-- Compact new button (visible when sidebar closed) -->
+      <div id="newPromptCompact" class="hidden w-full">
+        <%= link_to new_prompt_path, 
+              class: "flex items-center justify-center p-2.5 rounded-lg bg-accent-orange text-white hover:bg-accent-orange-dark transition-colors",
+              title: "New prompt",
+              aria: { label: "New prompt" } do %>
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
         <% end %>
-      </div>
-
-      <!-- compact new (visible when closed) -->
-      <div id="newPromptCompact" class="mb-3 hidden">
-        <%= link_to new_prompt_path, class: "inline-flex items-center justify-center p-2 rounded hover:bg-gray-100", title: "New prompt" do %>
-          <svg class="h-6 w-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg>
-        <% end %>
-      </div>
-
-      <!-- Search -->
-      <div class="mb-3">
-        <div class="relative">
-          <input id="sidebarSearch" type="search" placeholder="Search prompts" class="w-full border rounded px-3 py-2 text-sm" />
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
-        </div>
-      </div>
-
-      <!-- Quick nav items (icons + labels) -->
-      <nav class="mb-4">
-        <ul class="space-y-1">
-          <li>
-            <%= link_to prompt_templates_path, class: "flex items-center gap-3 p-2 rounded hover:bg-gray-50" do %>
-              <svg class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
-              <span data-label class="text-sm">Library</span>
-            <% end %>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="px-1">
-        <h4 data-label class="text-xs text-gray-500 mb-2">Prompts history</h4>
       </div>
     </div>
 
-    <!-- Prompts history list (scrollable) -->
-    <nav id="sidebar_history" class="px-2 py-2 flex-1 overflow-y-auto">
-      <% if user_signed_in? %>
-        <% current_user.prompts.order(created_at: :desc).limit(50).each do |p| %>
-          <div class="px-1">
-            <%= link_to prompt_path(p), data: { turbo_frame: "prompt_show" }, class: "flex items-center gap-2 p-2 rounded hover:bg-gray-50 text-sm" do %>
-              <span class="truncate"><%= p.idea.truncate(48) %></span>
-              <span class="ml-auto text-xs text-gray-400 hidden md:inline"><%= p.created_at.strftime("%b %-d") %></span>
-            <% end %>
-          </div>
-        <% end %>
-      <% else %>
-        <p class="text-sm text-gray-500 px-3">Sign in to save prompts</p>
-      <% end %>
+    <!-- Navigation items -->
+    <nav class="flex-1 overflow-y-auto py-3" aria-label="Main navigation">
+      <ul class="space-y-1 px-2">
+        <li>
+          <%= link_to dashboard_path, 
+                class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1",
+                aria: { current: (current_page?(dashboard_path) ? 'page' : nil) } do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span data-label>Dashboard</span>
+          <% end %>
+        </li>
+
+        <li>
+          <%= link_to prompts_path, 
+                class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1",
+                aria: { current: (current_page?(prompts_path) ? 'page' : nil) } do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span data-label>Prompts</span>
+          <% end %>
+        </li>
+
+        <li>
+          <%= link_to prompt_templates_path, 
+                class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1",
+                aria: { current: (current_page?(prompt_templates_path) ? 'page' : nil) } do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <span data-label>Saved</span>
+          <% end %>
+        </li>
+
+        <li>
+          <%= link_to edit_user_registration_path, 
+                class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1",
+                aria: { current: (current_page?(edit_user_registration_path) ? 'page' : nil) } do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span data-label>Settings</span>
+          <% end %>
+        </li>
+      </ul>
+
+      <!-- Collapse/Expand button -->
+      <div class="px-2 pt-4 pb-2 border-t border-neutral-100 mt-auto">
+        <button 
+          id="sidebarCollapseBtn"
+          aria-label="Collapse sidebar"
+          class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+          </svg>
+          <span data-label>Collapse</span>
+        </button>
+      </div>
     </nav>
   </div>
 </aside>

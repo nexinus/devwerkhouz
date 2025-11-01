@@ -1,31 +1,49 @@
-<footer>
-  <div class="w-full px-4 py-6 text-sm text-gray-600">
-    © <%= Time.current.year %> devwerkhouz
-    <nav class="space-x-4 text-sm inline-block ml-4">
-      <a href="/privacy" class="hover:underline">Privacy</a>
-      <a href="/terms" class="hover:underline">Terms</a>
-      <a href="/impressum" class="hover:underline">Impressum</a>
-      <%= render 'shared/cookie_consent' %>
-    </nav>
+<!-- Minimal ChatGPT-like footer: subtle, links to imprint/privacy/contact -->
+<footer class="border-t border-neutral-200 bg-white mt-auto">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-neutral-600">
+      <div class="text-neutral-500">
+        © <%= Time.current.year %> devwerkhouz
+      </div>
+      
+      <nav class="flex items-center gap-4" aria-label="Footer navigation">
+        <%= link_to "/privacy", 
+              class: "hover:text-neutral-900 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 rounded",
+              aria: { label: "Privacy Policy" } do %>
+          Privacy
+        <% end %>
+        <%= link_to "/terms", 
+              class: "hover:text-neutral-900 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 rounded",
+              aria: { label: "Terms of Service" } do %>
+          Terms
+        <% end %>
+        <%= link_to "/impressum", 
+              class: "hover:text-neutral-900 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 rounded",
+              aria: { label: "Impressum" } do %>
+          Impressum
+        <% end %>
+      </nav>
+    </div>
   </div>
 </footer>
 
 <script>
 document.addEventListener("turbo:submit-end", function(e) {
-  // if the response replaced #prompt-result content, scroll to it
+  // Scroll to prompt result after generation
   const frame = document.getElementById("prompt-result");
-  if (frame) { frame.scrollIntoView({behavior: "smooth", block: "start"}); }
+  if (frame) { 
+    frame.scrollIntoView({behavior: "smooth", block: "start"}); 
+  }
 });
-</script>
 
-<script>
 document.addEventListener("turbo:load", function() {
+  // Copy button functionality
   document.querySelectorAll(".copy-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const text = btn.getAttribute("data-text");
       navigator.clipboard.writeText(text).then(() => {
         const original = btn.innerText;
-        btn.innerText = "Copied";
+        btn.innerText = "Copied!";
         setTimeout(() => btn.innerText = original, 1500);
       });
     });
