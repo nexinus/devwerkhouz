@@ -29,9 +29,9 @@ Devise.setup do |config|
     config.omniauth :google_oauth2,
                     google_client_id,
                     google_client_secret,
-                    scope: 'userinfo.email, userinfo.profile',
+                    scope: 'email,profile',
                     prompt: 'select_account',
-                    access_type: 'offline' # 'offline' to request refresh_token
+                    hd: nil
   end
   
   # ==> Mailer Configuration
