@@ -3,6 +3,8 @@ module.exports = {
     "./app/views/**/*.erb",
     "./app/helpers/**/*.rb",
     "./app/javascript/**/*.{js,jsx,ts,tsx}",
+    "./app/assets/stylesheets/**/*.css",
+    "./app/assets/tailwind/**/*.css",
     "./app/assets/builds/**/*.css"
   ],
   safelist: [
