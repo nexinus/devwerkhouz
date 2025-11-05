@@ -1,30 +1,32 @@
+# app/controllers/users/omniauth_callbacks_controller.rb
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+  # Skip CSRF verification - OmniAuth validates via state parameter
+  skip_before_action :verify_authenticity_token, only: [:google_oauth2, :failure], raise: false
+
   def google_oauth2
     auth = request.env['omniauth.auth']
-    @user = User.from_omniauth(auth)
+    unless auth
+      redirect_to new_user_session_path, alert: "No auth data received."
+      return
+    end
+
+    @user = User.where(provider: auth.provider, uid: auth.uid).first
+    @user ||= User.find_by(email: auth.info.email)
+    @user ||= User.from_omniauth(auth) # creates and saves user if needed
 
     if @user.persisted?
-      # Set seen_welcome if first login (optional enhancement)
-      unless @user.seen_welcome?
-        @user.update(seen_welcome: true)
-      end
+      # optional: mark welcome seen on first sign-in
+      @user.update(seen_welcome: true) if @user.respond_to?(:seen_welcome) && @user.seen_welcome.blank?
 
       sign_in_and_redirect @user, event: :authentication
       set_flash_message(:notice, :success, kind: "Google") if is_navigational_format?
     else
-      # store data for sign up form if you want to finish registration
-      session["devise.google_data"] = auth.except(:extra)
-      redirect_to new_user_registration_url, alert: @user.errors.full_messages.join("\n")
+      session["devise.google_data"] = auth.except("extra")
+      redirect_to new_user_registration_url, alert: "Could not authenticate via Google."
     end
-  rescue StandardError => e
-    Rails.logger.error "Google OAuth error: #{e.message}"
-    redirect_to new_user_session_path, alert: "Authentication failed. Please try again."
   end
 
   def failure
-    reason = request.params[:message] || "unknown error"
-    Rails.logger.error "OmniAuth failure: #{reason}"
-    redirect_to new_user_session_path, alert: "Google sign-in was cancelled or failed. Please try again."
+    redirect_to new_user_session_path, alert: "Google sign-in failed"
   end
 end
-  
