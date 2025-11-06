@@ -29,7 +29,7 @@ Devise.setup do |config|
     config.omniauth :google_oauth2,
                     google_client_id,
                     google_client_secret,
-                    scope: 'email,profile',
+                    scope: 'userinfo.email, userinfo.profile',
                     prompt: 'select_account',
                     hd: nil
   end

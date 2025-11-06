@@ -75,8 +75,9 @@
       </div>
 
       <div class="mt-4">
-        <%= link_to user_google_oauth2_omniauth_authorize_path, 
-            data: { turbo: false }, 
+        <%= button_to user_google_oauth2_omniauth_authorize_path,
+            method: :post,
+            form: { data: { turbo: false }, class: "inline" },
             class: "w-full inline-flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transition-colors duration-150",
             aria: { label: "Sign in with Google" } do %>
           <svg class="h-5 w-5" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
