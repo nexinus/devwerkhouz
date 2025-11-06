@@ -11,159 +11,159 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="<%= asset_path 'favicon.ico' %>" type="image/x-icon">
     <link rel="apple-touch-icon" href="<%= asset_path 'logo.png' %>">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%# Styles & scripts %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <div id="copy-action-modal" data-controller="prompt-actions" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
-    <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg">
-      <h3 class="text-lg font-semibold mb-3">What do you want to do with this prompt?</h3>
-      <p id="cam-prompt-preview" class="whitespace-pre-wrap text-sm mb-4 max-h-40 overflow-auto"></p>
-
-      <div class="flex gap-3">
-        <button data-action="click->prompt-actions#copyToClipboard" id="cam-copy-btn" class="px-3 py-2 rounded bg-brand text-white">Copy to clipboard</button>
-        <button id="cam-open-chatgpt" class="px-3 py-2 rounded border" onclick="window.open('https://chat.openai.com','_blank')">Open ChatGPT (paste manually)</button>
-        <button id="cam-continue" onclick="document.getElementById('copy-action-modal').classList.add('hidden')" class="px-3 py-2 rounded border">Continue working</button>
-      </div>
-
-      <div id="cam-result" class="mt-4 text-sm hidden"></div>
-    </div>
-  </div>
-
   <body class="min-h-screen bg-neutral-50 text-neutral-900">
-  <!-- Header (fixed) -->
-  <%= render 'shared/header' %>
-  
-  <div id="app" class="flex h-screen overflow-hidden pt-14">
-    <!-- Sidebar (collapsible) -->
-    <%= render 'shared/sidebar' %>
+    <%# ---- Header & Sidebar conditional rendering ---- %>
+    <% if user_signed_in? %>
+      <%= render 'shared/header' %>
+      <div id="app" class="flex h-screen overflow-hidden pt-14">
+        <%= render 'shared/sidebar' %>
 
-    <!-- Main area (content + footer inside a vertical column) -->
-    <div id="main-content" class="flex-1 flex flex-col min-h-0 overflow-hidden ml-64 transition-all duration-200">
-      <!-- Content area -->
-      <main id="main" class="flex-1 overflow-auto">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <% flash.each do |key, message| %>
-            <div class="mb-4 p-3 rounded-lg text-sm <%= key == 'notice' ? 'bg-brand/10 text-brand border border-brand/20' : 'bg-red-50 text-red-800 border border-red-200' %>">
-              <%= message %>
+        <!-- Main area when signed-in: keep left margin for sidebar and top padding for header -->
+        <div id="main-content" class="flex-1 flex flex-col min-h-0 overflow-hidden ml-64 transition-all duration-200">
+          <main id="main" class="flex-1 overflow-auto">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <% flash.each do |key, message| %>
+                <div class="mb-4 p-3 rounded-lg text-sm <%= key == 'notice' ? 'bg-brand/10 text-brand border border-brand/20' : 'bg-red-50 text-red-800 border border-red-200' %>">
+                  <%= message %>
+                </div>
+              <% end %>
+
+              <%= yield %>
             </div>
-          <% end %>
+          </main>
 
-          <%= yield %>
+          <%= render 'shared/footer' %>
         </div>
-      </main>
+      </div>
+    <% else %>
+      <%= render 'shared/header_public' %>
 
-      <!-- Footer -->
-      <%= render 'shared/footer' %>
+      <!-- Main area for public/landing pages: no sidebar, only header top padding -->
+      <div id="app-public" class="flex flex-col min-h-screen pt-14">
+        <main id="main" class="flex-1">
+          <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <% flash.each do |key, message| %>
+              <div class="mb-4 p-3 rounded-lg text-sm <%= key == 'notice' ? 'bg-brand/10 text-brand border border-brand/20' : 'bg-red-50 text-red-800 border border-red-200' %>">
+                <%= message %>
+              </div>
+            <% end %>
+
+            <%= yield %>
+          </div>
+        </main>
+
+        <%= render 'shared/footer' %>
+      </div>
+    <% end %>
+
+    <%# Cookie consent (rendered for both public & signed-in) %>
+    <%= render 'shared/cookie_consent' %>
+
+    <%# Copy-action modal (keeps it here) %>
+    <div id="copy-action-modal" data-controller="prompt-actions" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+      <div class="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg">
+        <h3 class="text-lg font-semibold mb-3">What do you want to do with this prompt?</h3>
+        <p id="cam-prompt-preview" class="whitespace-pre-wrap text-sm mb-4 max-h-40 overflow-auto"></p>
+
+        <div class="flex gap-3">
+          <button data-action="click->prompt-actions#copyToClipboard" id="cam-copy-btn" class="px-3 py-2 rounded bg-brand text-white">Copy to clipboard</button>
+          <button id="cam-open-chatgpt" class="px-3 py-2 rounded border" onclick="window.open('https://chat.openai.com','_blank')">Open ChatGPT (paste manually)</button>
+          <button id="cam-continue" onclick="document.getElementById('copy-action-modal').classList.add('hidden')" class="px-3 py-2 rounded border">Continue working</button>
+        </div>
+
+        <div id="cam-result" class="mt-4 text-sm hidden"></div>
+      </div>
     </div>
-  </div>
 
-  <!-- Cookie consent -->
-  <%= render 'shared/cookie_consent' %>
+    <%# Sidebar toggle + helper JS (only used when the sidebar exists) %>
+    <script>
+      (function() {
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('sidebarCollapseBtn');
+        const root = document.getElementById('app') || document.getElementById('app-public');
+        const SIDEBAR_KEY = 'devwerkhouz_sidebar_open';
 
-  <!-- Sidebar toggle + small helper JS -->
-  <script>
-    (function() {
-      const root = document.getElementById('app');
-      const sidebar = document.getElementById('sidebar');
-      const collapseBtn = document.getElementById('sidebarCollapseBtn');
-      const SIDEBAR_KEY = 'devwerkhouz_sidebar_open';
-
-      // elements we'll toggle
-      const labelNodes = () => Array.from(document.querySelectorAll('[data-label]'));
-      const newTop = document.getElementById('newPromptTop');
-      const newCompact = document.getElementById('newPromptCompact');
-
-      function isOpen() {
-        return localStorage.getItem(SIDEBAR_KEY) !== 'false';
-      }
-
-      function showLabels(show) {
-        labelNodes().forEach(n => {
-          if (show) n.classList.remove('hidden'); else n.classList.add('hidden');
-        });
-      }
-
-      function applyState() {
+        // Safe-guard: if there's no sidebar (public), skip sidebar setup
         if (!sidebar) return;
 
-        // Adjust main content margin when sidebar is collapsed
-        const mainContent = document.getElementById('main-content');
-        
-        if (isOpen()) {
-          sidebar.classList.remove('w-16');
-          sidebar.classList.add('w-64');
-          if (mainContent) {
-            mainContent.classList.remove('ml-16');
-            mainContent.classList.add('ml-64');
-          }
+        // elements we'll toggle
+        const labelNodes = () => Array.from(document.querySelectorAll('[data-label]'));
+        const newTop = document.getElementById('newPromptTop');
+        const newCompact = document.getElementById('newPromptCompact');
 
-          root?.classList.remove('sidebar-closed');
-          root?.classList.add('sidebar-open');
-
-          showLabels(true);
-
-          if (newTop) newTop.classList.remove('hidden');
-          if (newCompact) newCompact.classList.add('hidden');
-        } else {
-          sidebar.classList.remove('w-64');
-          sidebar.classList.add('w-16');
-          if (mainContent) {
-            mainContent.classList.remove('ml-64');
-            mainContent.classList.add('ml-16');
-          }
-
-          root?.classList.remove('sidebar-open');
-          root?.classList.add('sidebar-closed');
-
-          showLabels(false);
-
-          if (newTop) newTop.classList.add('hidden');
-          if (newCompact) newCompact.classList.remove('hidden');
+        function isOpen() {
+          return localStorage.getItem(SIDEBAR_KEY) !== 'false';
         }
-      }
 
-      function toggleSidebar() {
-        const newState = !isOpen();
-        localStorage.setItem(SIDEBAR_KEY, newState ? 'true' : 'false');
-        applyState();
-      }
+        function showLabels(show) {
+          labelNodes().forEach(n => {
+            if (show) n.classList.remove('hidden'); else n.classList.add('hidden');
+          });
+        }
 
-      if (collapseBtn) collapseBtn.addEventListener('click', toggleSidebar);
-      window.toggleSidebar = toggleSidebar;
+        function applyState() {
+          if (!sidebar) return;
+          const mainContent = document.getElementById('main-content');
 
-      // On mobile, default to closed sidebar
-      if (window.innerWidth < 768 && localStorage.getItem(SIDEBAR_KEY) === null) {
-        localStorage.setItem(SIDEBAR_KEY, 'false');
-      }
+          if (isOpen()) {
+            sidebar.classList.remove('w-16'); sidebar.classList.add('w-64');
+            if (mainContent) { mainContent.classList.remove('ml-16'); mainContent.classList.add('ml-64'); }
 
-      // Hide sidebar on mobile by default
-      if (window.innerWidth < 768) {
-        sidebar.classList.add('hidden');
-      }
+            root?.classList.remove('sidebar-closed'); root?.classList.add('sidebar-open');
+            showLabels(true);
 
-      document.addEventListener('DOMContentLoaded', applyState);
-      document.addEventListener('turbo:load', applyState);
-      window.addEventListener('resize', function() {
-        applyState();
-        // Show/hide sidebar on mobile
+            if (newTop) newTop.classList.remove('hidden');
+            if (newCompact) newCompact.classList.add('hidden');
+          } else {
+            sidebar.classList.remove('w-64'); sidebar.classList.add('w-16');
+            if (mainContent) { mainContent.classList.remove('ml-64'); mainContent.classList.add('ml-16'); }
+
+            root?.classList.remove('sidebar-open'); root?.classList.add('sidebar-closed');
+            showLabels(false);
+
+            if (newTop) newTop.classList.add('hidden');
+            if (newCompact) newCompact.classList.remove('hidden');
+          }
+        }
+
+        function toggleSidebar() {
+          const newState = !isOpen();
+          localStorage.setItem(SIDEBAR_KEY, newState ? 'true' : 'false');
+          applyState();
+        }
+
+        if (collapseBtn) collapseBtn.addEventListener('click', toggleSidebar);
+        window.toggleSidebar = toggleSidebar;
+
+        if (window.innerWidth < 768 && localStorage.getItem(SIDEBAR_KEY) === null) {
+          localStorage.setItem(SIDEBAR_KEY, 'false');
+        }
+
         if (window.innerWidth < 768) {
           sidebar.classList.add('hidden');
-        } else {
-          sidebar.classList.remove('hidden');
         }
-      });
-    })();
-  </script>
 
+        document.addEventListener('DOMContentLoaded', applyState);
+        document.addEventListener('turbo:load', applyState);
+        window.addEventListener('resize', function() {
+          applyState();
+          if (window.innerWidth < 768) {
+            sidebar.classList.add('hidden');
+          } else {
+            sidebar.classList.remove('hidden');
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
