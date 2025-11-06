@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_27_112757) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_06_112452) do
   create_table "prompt_templates", force: :cascade do |t|
     t.string "title", null: false
     t.text "prompt_text", null: false
@@ -54,6 +54,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_27_112757) do
     t.datetime "remember_created_at"
     t.string "provider"
     t.string "uid"
+    t.string "avatar_url"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

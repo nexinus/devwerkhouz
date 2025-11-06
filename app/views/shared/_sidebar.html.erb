@@ -1,13 +1,21 @@
-<!-- ChatGPT-like collapsible sidebar: icons + labels, responsive -->
-<aside id="sidebar" class="fixed left-0 top-14 bottom-0 bg-white border-r border-neutral-200 flex-shrink-0 transition-all duration-200 ease-in-out w-64 z-40 overflow-hidden flex flex-col">
-  <div class="h-full flex flex-col overflow-hidden">
+<aside id="sidebar"
+       class="fixed left-0 top-0 bottom-0 bg-white border-r border-neutral-200 flex-shrink-0 transition-all duration-200 ease-in-out w-64 z-40 overflow-hidden flex flex-col">
+  <div class="h-full flex flex-col">
+
+    <!-- TOP: logo + optional package viewer -->
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
+      <%= link_to root_path, class: "flex items-center gap-2", aria: { label: "devwerkhouz home" } do %>
+        <%= image_tag "logo.png", alt: "devwerkhouz logo", class: "h-10 w-auto object-contain" %>
+      <% end %>
+    </div>
+
     <!-- New prompt button (top) -->
     <div class="px-3 pt-4 pb-3 border-b border-neutral-100">
       <div id="newPromptTop" class="w-full">
-        <%= link_to new_prompt_path, 
-              class: "btn-orange flex items-center justify-center gap-2 w-full",
+        <%= link_to new_prompt_path,
+              class: "btn-orange flex items-center gap-2 w-full justify-center",
               title: "New prompt" do %>
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
             <path d="M12 5v14M5 12h14"/>
           </svg>
           <span data-label class="text-sm">New prompt</span>
@@ -16,11 +24,11 @@
 
       <!-- Compact new button (visible when sidebar closed) -->
       <div id="newPromptCompact" class="hidden w-full">
-        <%= link_to new_prompt_path, 
+        <%= link_to new_prompt_path,
               class: "flex items-center justify-center p-2.5 rounded-lg bg-accent-orange text-white hover:bg-accent-orange-dark transition-colors",
               title: "New prompt",
               aria: { label: "New prompt" } do %>
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
             <path d="M12 5v14M5 12h14"/>
           </svg>
         <% end %>
@@ -31,10 +39,10 @@
     <nav class="flex-1 overflow-y-auto py-3" aria-label="Main navigation">
       <ul class="space-y-1 px-2">
         <li>
-          <%= link_to dashboard_path, 
+          <%= link_to dashboard_path,
                 class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1",
                 aria: { current: (current_page?(dashboard_path) ? 'page' : nil) } do %>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             <span data-label>Dashboard</span>
@@ -42,10 +50,10 @@
         </li>
 
         <li>
-          <%= link_to prompts_path, 
+          <%= link_to prompts_path,
                 class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1",
                 aria: { current: (current_page?(prompts_path) ? 'page' : nil) } do %>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span data-label>Prompts</span>
@@ -53,10 +61,10 @@
         </li>
 
         <li>
-          <%= link_to prompt_templates_path, 
+          <%= link_to prompt_templates_path,
                 class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1",
                 aria: { current: (current_page?(prompt_templates_path) ? 'page' : nil) } do %>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
             <span data-label>Saved</span>
@@ -64,10 +72,10 @@
         </li>
 
         <li>
-          <%= link_to edit_user_registration_path, 
+          <%= link_to edit_user_registration_path,
                 class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1",
                 aria: { current: (current_page?(edit_user_registration_path) ? 'page' : nil) } do %>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -78,17 +86,69 @@
 
       <!-- Collapse/Expand button -->
       <div class="px-2 pt-4 pb-2 border-t border-neutral-100 mt-auto">
-        <button 
+        <button
           id="sidebarCollapseBtn"
           aria-label="Collapse sidebar"
           class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
           </svg>
           <span data-label>Collapse</span>
         </button>
       </div>
     </nav>
+
+    <!-- BOTTOM: sticky account row (avatar | name | upgrade) -->
+    <div class="sticky bottom-0 z-30 bg-white border-t border-neutral-100 py-2 px-3">
+      <div
+        tabindex="0"
+        role="button"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-label="Open profile menu"
+        data-testid="accounts-profile-button"
+        class="group flex items-center gap-3 w-full rounded-lg hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 p-2"
+      >
+        <!-- Avatar (left) -->
+        <div class="flex-shrink-0">
+          <% if current_user&.avatar_url.present? %>
+            <%= image_tag current_user.avatar_url,
+                  alt: (current_user.name.presence || current_user.email),
+                  class: "h-9 w-9 rounded-full object-cover" %>
+          <% else %>
+            <div class="h-9 w-9 rounded-full bg-accent-orange text-white flex items-center justify-center text-sm font-medium select-none">
+              <%= current_user&.name&.first&.upcase || current_user&.email&.first&.upcase || "U" %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Name & plan (middle; truncates) -->
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center justify-between gap-3">
+            <div class="truncate text-sm font-medium text-neutral-900" title="<%= current_user&.name.presence || current_user&.email || 'Account' %>">
+              <%= current_user&.name.presence || current_user&.email || "Account" %>
+            </div>
+            <!-- Optional small status badge (hidden on very small screens) -->
+            <div class="hidden sm:inline text-xs text-neutral-500">
+              <%= current_user&.plan.presence || "Free" rescue "Free" %>
+            </div>
+          </div>
+
+          <div class="text-xs text-neutral-500 truncate">
+            <%= current_user&.email %>
+          </div>
+        </div>
+
+        <!-- Upgrade CTA (right) -->
+        <div class="flex-shrink-0 ml-2">
+          <%= link_to pricing_path,
+                class: "inline-flex items-center px-3 py-1.5 bg-accent-orange hover:bg-accent-orange-dark text-white text-sm font-medium rounded-md shadow-orange-soft transition-colors focus:outline-none focus:ring-2 focus:ring-accent-orange focus:ring-offset-2",
+                aria: { label: "Upgrade" } do %>
+            Upgrade
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
 </aside>

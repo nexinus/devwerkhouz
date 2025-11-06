@@ -48,4 +48,19 @@ class User < ApplicationRecord
       # confirmed_at: Time.current
     )
   end
+
+  # Return avatar URL stored on the user, or fallback to Gravatar, or nil.
+  def avatar_url
+    # prefer explicit avatar_url column if present
+    url = self[:avatar_url].presence
+    return url if url.present?
+
+    # fallback: gravatar based on email, if available
+    if email.present?
+      hash = Digest::MD5.hexdigest(email.strip.downcase)
+      "https://www.gravatar.com/avatar/#{hash}?s=200&d=identicon"
+    else
+      nil
+    end
+  end
 end
