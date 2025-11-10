@@ -14,7 +14,7 @@
 
 :root {
   --brand: #819231;
-  --header-height: 56px; /* or 3.5rem if you prefer rem */
+  --header-height: 64px; /* or 3.5rem if you prefer rem */
 }
 
 /* Fallback utilities to ensure brand color is present in the bundle even if purged */

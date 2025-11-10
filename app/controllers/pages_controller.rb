@@ -1,5 +1,7 @@
 class PagesController < ApplicationController
   def home
+    # show a composer-first experience for logged in users later
+    @generated_prompt = flash[:generated_prompt] # optional
     # ensure the prompt form has a model object (prevents `undefined method 'idea' for false`)
     @prompt = Prompt.new
 

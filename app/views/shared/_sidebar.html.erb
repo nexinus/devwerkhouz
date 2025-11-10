@@ -1,8 +1,8 @@
+<!-- app/views/shared/_sidebar.html.erb -->
 <aside id="sidebar"
        class="fixed left-0 bg-white border-r border-neutral-200 w-64 z-40 overflow-hidden flex flex-col"
        style="top:var(--header-height); height:calc(100vh - var(--header-height));">
   <div class="h-full flex flex-col">
-
     <!-- TOP: logo + optional package viewer -->
     <div class="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
       <%= link_to root_path, class: "flex items-center gap-2", aria: { label: "devwerkhouz home" } do %>
@@ -68,7 +68,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
-            <span data-label>Saved</span>
+            <span data-label>Library</span>
           <% end %>
         </li>
 
@@ -100,56 +100,6 @@
       </div>
     </nav>
 
-    <!-- BOTTOM: sticky account row (avatar | name | upgrade) -->
-    <div class="sticky bottom-0 z-30 bg-white border-t border-neutral-100 py-2 px-3">
-      <div
-        tabindex="0"
-        role="button"
-        aria-haspopup="menu"
-        aria-expanded="false"
-        aria-label="Open profile menu"
-        data-testid="accounts-profile-button"
-        class="group flex items-center gap-3 w-full rounded-lg hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 p-2"
-      >
-        <!-- Avatar (left) -->
-        <div class="flex-shrink-0">
-          <% if current_user&.avatar_url.present? %>
-            <%= image_tag current_user.avatar_url,
-                  alt: (current_user.name.presence || current_user.email),
-                  class: "h-9 w-9 rounded-full object-cover" %>
-          <% else %>
-            <div class="h-9 w-9 rounded-full bg-accent-orange text-white flex items-center justify-center text-sm font-medium select-none">
-              <%= current_user&.name&.first&.upcase || current_user&.email&.first&.upcase || "U" %>
-            </div>
-          <% end %>
-        </div>
-
-        <!-- Name & plan (middle; truncates) -->
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center justify-between gap-3">
-            <div class="truncate text-sm font-medium text-neutral-900" title="<%= current_user&.name.presence || current_user&.email || 'Account' %>">
-              <%= current_user&.name.presence || current_user&.email || "Account" %>
-            </div>
-            <!-- Optional small status badge (hidden on very small screens) -->
-            <div class="hidden sm:inline text-xs text-neutral-500">
-              <%= current_user&.plan.presence || "Free" rescue "Free" %>
-            </div>
-          </div>
-
-          <div class="text-xs text-neutral-500 truncate">
-            <%= current_user&.email %>
-          </div>
-        </div>
-
-        <!-- Upgrade CTA (right) -->
-        <div class="flex-shrink-0 ml-2">
-          <%= link_to pricing_path,
-                class: "inline-flex items-center px-3 py-1.5 bg-accent-orange hover:bg-accent-orange-dark text-white text-sm font-medium rounded-md shadow-orange-soft transition-colors focus:outline-none focus:ring-2 focus:ring-accent-orange focus:ring-offset-2",
-                aria: { label: "Upgrade" } do %>
-            Upgrade
-          <% end %>
-        </div>
-      </div>
-    </div>
+    <%= render 'shared/sidebar_account_row' %>
   </div>
 </aside>

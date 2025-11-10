@@ -12,8 +12,8 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "prompts#new"
-  root "pages#_hero"
-  #root "pages#home"
+  # root "pages#_hero"
+  root "pages#home"
 
   # auth
   get "/signup", to: "registrations#new", as: :signup
@@ -40,6 +40,8 @@ Rails.application.routes.draw do
   # Also map the .html URLs Stripe might use:
   get "/success", to: "payments#success", as: :payment_success
   get "/cancel", to: "payments#cancel", as: :payment_cancel
+
+  get "/support", to: "pages#support", as: :support
 
   # Static pages
   get "/privacy", to: "pages#privacy"

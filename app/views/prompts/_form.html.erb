@@ -1,7 +1,4 @@
-<%# app/views/prompts/_form.html.erb %>
-
-<%# Fallbacks (if you prefer, move these into config/initializers/prompt_library.rb) %>
-<% default_lib = {
+<% default_lib ||= {
   categories: [
     "Writing & Content", "Marketing & Growth", "Business & Productivity",
     "Code & Tech", "Learning & Knowledge", "Creative & Design", "Personal & Miscellaneous"
@@ -13,168 +10,376 @@
 } %>
 
 <% lib = defined?(PROMPT_LIBRARY) ? PROMPT_LIBRARY : default_lib %>
+<% model = local_assigns[:prompt] || @prompt || Prompt.new %>
 
-<%= turbo_frame_tag "prompt_form" do %>
-  <% model = local_assigns[:prompt] || @prompt || Prompt.new %>
+<%= form_with model: model, url: prompts_path, scope: :prompt, method: :post, local: false, html: { class: "space-y-4", id: "prompt-form" } do |f| %>
+  <!--
+    Container scopes all JS selectors to this form instance, preventing duplicate bindings
+    when the partial is rendered multiple times on a page.
+  -->
+  <div id="prompt-form-ui" class="space-y-4">
+  <!-- IDEA -->
+  <div>
+    <%= f.label :idea, "Your idea", class: "block text-sm font-medium text-neutral-800" %>
+    <%= f.text_area :idea,
+      value: (defined?(@previous_input) && @previous_input && @previous_input[:idea]) || params.dig(:prompt, :idea) || f.object.try(:idea) || "",
+      rows: 5,
+      class: "mt-1 block w-full rounded-lg border border-neutral-200 bg-white p-3 placeholder-neutral-400 focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange transition-shadow",
+      placeholder: "Describe the idea or goal for this prompt" %>
+    <p class="text-xs text-neutral-500 mt-1">Be specific — the model performs better with a clear goal.</p>
+  </div>
 
-  <%= form_with model: model, url: prompts_path, scope: :prompt, method: :post, local: false, html: { class: "space-y-4" } do |f| %>
-    <div class="mb-3">
-      <%= f.label :idea, "Your idea", class: "block text-sm font-medium text-gray-700" %>
-      <%= f.text_area :idea,
-            value: (defined?(@previous_input) && @previous_input && @previous_input[:idea]) || params.dig(:prompt, :idea) || f.object.try(:idea) || "",
-            rows: 6,
-            class: "w-full border p-2 rounded",
-            placeholder: "Describe the idea or goal for this prompt",
-            aria: { describedby: "idea-help" } %>
-      <p id="idea-help" class="text-xs text-gray-500 mt-1">Briefly describe the goal so the generated prompt is focused.</p>
+  <!-- ROLE -->
+  <div>
+    <%= f.label :role, "Role / perspective", class: "block text-sm font-medium text-neutral-800 mb-2" %>
+
+    <div class="flex items-center gap-2 flex-wrap mb-2">
+      <% ["Act as an experienced UX writer","Act as a senior developer","Act as a product manager"].each do |preset| %>
+        <button type="button" class="role-chip inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm border bg-white text-neutral-700 hover:scale-105 hover:shadow-sm transition transform focus:outline-none focus:ring-2 focus:ring-accent-orange" data-role="<%= preset %>" aria-pressed="false"><%= preset %></button>
+      <% end %>
+
+      <button type="button" id="role-clear" class="inline-flex items-center px-2 py-1 rounded border text-xs text-neutral-500 hover:bg-neutral-100 transition focus:outline-none focus:ring-2 focus:ring-accent-orange">Clear</button>
     </div>
 
-    <div class="flex gap-2 mb-3">
-      <div class="flex-1">
-        <%= f.label :category, "Category", class: "sr-only" %>
-        <%= f.select :category,
-              options_for_select(lib[:categories], (defined?(@previous_input) && @previous_input && @previous_input[:category]) || f.object.try(:category)),
-              { include_blank: "Select category" },
-              class: "w-full border p-2 rounded",
-              aria: { label: "Category" } %>
-      </div>
+    <%= f.text_area :role,
+      value: (defined?(@previous_input) && @previous_input && @previous_input[:role]) || params.dig(:prompt, :role) || f.object.try(:role) || "",
+      rows: 3,
+      class: "block w-full rounded-md border border-neutral-200 bg-white p-3 placeholder-neutral-400 focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange transition-shadow",
+      placeholder: 'Tell the model who to be (e.g., "Act as an experienced UX writer")' %>
+    <p class="text-xs text-neutral-500 mt-1">Optional — set a persona or perspective for the response.</p>
+  </div>
 
-      <div class="w-1/3">
-        <%# Primary tone select (shown) %>
-        <%= f.label :tone, "Tone", class: "sr-only" %>
+  <!-- CATEGORY (chips + custom input) -->
+  <div>
+    <label class="block text-sm font-medium text-neutral-800 mb-2">Category</label>
+    <div class="flex flex-wrap gap-2">
+      <% lib[:categories].each do |c| %>
+        <% selected = ((defined?(@previous_input) && @previous_input && @previous_input[:category]) || f.object.try(:category)) == c %>
+        <button type="button"
+                class="category-chip inline-flex items-center px-3 py-1 rounded-full text-sm border focus:outline-none focus:ring-2 focus:ring-accent-orange transition transform hover:scale-105 hover:shadow-sm <%= selected ? 'bg-accent-orange text-white border-accent-orange' : 'bg-white text-neutral-700' %>"
+                data-value="<%= c %>"
+                aria-pressed="<%= selected %>"><%= c %></button>
+      <% end %>
+
+      <div class="flex items-center gap-2">
+        <input id="category-custom" class="ml-2 rounded-md border border-neutral-200 p-2 text-sm placeholder-neutral-400 focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange transition" placeholder="Custom category" value="<%= (defined?(@previous_input) && @previous_input && @previous_input[:category] && !lib[:categories].include?(@previous_input[:category]) ? @previous_input[:category] : (params.dig(:prompt, :category) unless lib[:categories].include?(params.dig(:prompt, :category)))) || (f.object.try(:category) unless lib[:categories].include?(f.object.try(:category))) || '' %>" />
+      </div>
+    </div>
+
+    <!-- Hidden input that will actually be submitted -->
+    <%= f.hidden_field :category, value: (defined?(@previous_input) && @previous_input && @previous_input[:category]) || params.dig(:prompt, :category) || f.object.try(:category), id: "category-hidden" %>
+    <p class="text-xs text-neutral-500 mt-1">Choose a category or enter a custom one — used for organizing saved prompts.</p>
+  </div>
+
+  <!-- Tone & Format (pill groups with "more" popovers) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- TONE -->
+    <div>
+      <label class="block text-sm font-medium text-neutral-800 mb-2">Tone</label>
+      <div class="flex items-center gap-2 flex-wrap">
+        <% lib[:tones_primary].each do |t| %>
+          <% selected = ((defined?(@previous_input) && @previous_input && @previous_input[:tone]) || f.object.try(:tone)) == t %>
+          <button type="button"
+                  class="tone-chip inline-flex items-center px-3 py-1 rounded-md text-sm border focus:outline-none focus:ring-2 focus:ring-accent-orange transition transform hover:scale-105 hover:shadow-sm <%= selected ? 'bg-accent-orange text-white border-accent-orange' : 'bg-white text-neutral-700' %>"
+                  data-value="<%= t %>" aria-pressed="<%= selected %>"><%= t %></button>
+        <% end %>
+
         <div class="relative">
-          <select id="tone-primary" name="prompt[tone]" class="w-full border p-2 rounded" aria-label="Tone">
-            <option value="" disabled <%= "selected" if ((defined?(@previous_input) && @previous_input && @previous_input[:tone]).blank? && f.object.try(:tone).blank?) %>>Select tone</option>
-            <% lib[:tones_primary].each do |t| %>
-              <% selected = ((defined?(@previous_input) && @previous_input && @previous_input[:tone]) || f.object.try(:tone)) == t %>
-              <option value="<%= t %>" <%= "selected" if selected %>><%= t %></option>
-            <% end %>
-          </select>
+          <button type="button" id="tone-more-toggle" class="inline-flex items-center px-3 py-1 rounded-md border text-sm bg-white hover:scale-105 transition focus:outline-none focus:ring-2 focus:ring-accent-orange">More ▾</button>
+          <span id="tone-selected-label" class="ml-2 text-xs text-neutral-600 hidden"></span>
 
-          <a href="#" id="toggle-tones" class="absolute right-2 top-2 text-xs underline">More</a>
+          <!-- popover -->
+          <div id="tone-more" class="hidden absolute mt-2 right-0 z-20 w-48 bg-white border rounded-md shadow-lg p-2">
+            <div class="text-xs text-neutral-500 mb-2">All tones</div>
+            <div class="flex flex-col gap-1 max-h-40 overflow-auto">
+              <% lib[:tones_all].each do |t| %>
+                <button type="button" class="tone-more-item text-left px-2 py-1 rounded hover:bg-neutral-50 text-sm transition focus:outline-none focus:ring-2 focus:ring-accent-orange" data-value="<%= t %>"><%= t %></button>
+              <% end %>
+            </div>
+          </div>
         </div>
 
-        <%# Advanced/all tone select (hidden by default) %>
-        <div id="tone-advanced-wrapper" class="mt-2 hidden">
-          <label class="block text-xs text-gray-600 mb-1">All tones</label>
-          <select id="tone-advanced" class="w-full border p-2 rounded" aria-label="All tones">
-            <option value="">(leave blank to keep primary)</option>
-            <% lib[:tones_all].each do |t| %>
-              <option value="<%= t %>"><%= t %></option>
-            <% end %>
-          </select>
-        </div>
       </div>
 
-      <div class="w-1/3">
-        <%# Primary format select (shown) %>
-        <%= f.label :format, "Format", class: "sr-only" %>
+      <%= f.hidden_field :tone, value: (defined?(@previous_input) && @previous_input && @previous_input[:tone]) || params.dig(:prompt, :tone) || f.object.try(:tone), id: "tone-hidden" %>
+      <p class="text-xs text-neutral-500 mt-1">Pick a tone to shape style and word choices.</p>
+    </div>
+
+    <!-- FORMAT -->
+    <div>
+      <label class="block text-sm font-medium text-neutral-800 mb-2">Format</label>
+      <div class="flex items-center gap-2 flex-wrap">
+        <% lib[:formats_primary].each do |fmt| %>
+          <% selected = ((defined?(@previous_input) && @previous_input && @previous_input[:format]) || f.object.try(:format)) == fmt %>
+          <button type="button"
+                  class="format-chip inline-flex items-center px-3 py-1 rounded-md text-sm border focus:outline-none focus:ring-2 focus:ring-accent-orange transition transform hover:scale-105 hover:shadow-sm <%= selected ? 'bg-accent-orange text-white border-accent-orange' : 'bg-white text-neutral-700' %>"
+                  data-value="<%= fmt %>" aria-pressed="<%= selected %>"><%= fmt %></button>
+        <% end %>
+
         <div class="relative">
-          <select id="format-primary" name="prompt[format]" class="w-full border p-2 rounded" aria-label="Format">
-            <option value="" disabled <%= "selected" if ((defined?(@previous_input) && @previous_input && @previous_input[:format]).blank? && f.object.try(:format).blank?) %>>Format</option>
-            <% lib[:formats_primary].each do |fmt| %>
-              <% selected = ((defined?(@previous_input) && @previous_input && @previous_input[:format]) || f.object.try(:format)) == fmt %>
-              <option value="<%= fmt %>" <%= "selected" if selected %>><%= fmt %></option>
-            <% end %>
-          </select>
+          <button type="button" id="format-more-toggle" class="inline-flex items-center px-3 py-1 rounded-md border text-sm bg-white hover:scale-105 transition focus:outline-none focus:ring-2 focus:ring-accent-orange">More ▾</button>
+          <span id="format-selected-label" class="ml-2 text-xs text-neutral-600 hidden"></span>
 
-          <a href="#" id="toggle-formats" class="absolute right-2 top-2 text-xs underline">More</a>
-        </div>
-
-        <%# Advanced/all formats (hidden) %>
-        <div id="format-advanced-wrapper" class="mt-2 hidden">
-          <label class="block text-xs text-gray-600 mb-1">All formats</label>
-          <select id="format-advanced" class="w-full border p-2 rounded" aria-label="All formats">
-            <option value="">(leave blank to keep primary)</option>
-            <% lib[:formats_all].each do |fmt| %>
-              <option value="<%= fmt %>"><%= fmt %></option>
-            <% end %>
-          </select>
+          <div id="format-more" class="hidden absolute mt-2 right-0 z-20 w-56 bg-white border rounded-md shadow-lg p-2">
+            <div class="text-xs text-neutral-500 mb-2">All formats</div>
+            <div class="flex flex-col gap-1 max-h-44 overflow-auto">
+              <% lib[:formats_all].each do |fmt| %>
+                <button type="button" class="format-more-item text-left px-2 py-1 rounded hover:bg-neutral-50 text-sm transition focus:outline-none focus:ring-2 focus:ring-accent-orange" data-value="<%= fmt %>"><%= fmt %></button>
+              <% end %>
+            </div>
+          </div>
         </div>
       </div>
+
+      <%= f.hidden_field :format, value: (defined?(@previous_input) && @previous_input && @previous_input[:format]) || params.dig(:prompt, :format) || f.object.try(:format), id: "format-hidden" %>
+      <p class="text-xs text-neutral-500 mt-1">Select how you want the assistant to return the result.</p>
+    </div>
+  </div>
+
+  <!-- Audience + Output length -->
+  <div class="flex gap-4 items-end">
+    <div class="flex-1">
+      <%= f.label :audience, "Audience / Tags", class: "block text-sm font-medium text-neutral-800" %>
+      <%= f.text_field :audience,
+        value: (defined?(@previous_input) && @previous_input && @previous_input[:audience]) || params.dig(:prompt, :audience) || f.object.try(:audience) || "",
+        placeholder: "e.g. Developers, HR, Small business",
+        class: "mt-1 block w-full rounded-md border border-neutral-200 p-2 focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange transition" %>
+      <p class="text-xs text-neutral-500 mt-1">Comma-separated tags to guide tone and examples.</p>
     </div>
 
-    <div class="flex gap-2 items-center mb-3">
-      <div class="flex-1">
-        <%= f.label :audience, "Audience / Tags", class: "block text-sm text-gray-600" %>
-        <%= f.text_field :audience,
-              value: (defined?(@previous_input) && @previous_input && @previous_input[:audience]) || params.dig(:prompt, :audience) || f.object.try(:audience) || "",
-              placeholder: "e.g. Developers, HR, Small business",
-              class: "w-full border p-2 rounded" %>
-        <p class="text-xs text-gray-500 mt-1">Comma-separated tags to guide tone and examples.</p>
+    <div class="w-48">
+      <label class="block text-sm font-medium text-neutral-800 mb-2">Output length</label>
+      <div class="inline-flex rounded-md border overflow-hidden">
+        <% lengths = { "short" => "Short", "medium" => "Medium", "long" => "Long" } %>
+        <% current_length = (defined?(@previous_input) && @previous_input && @previous_input[:length]) || params.dig(:prompt, :length) || f.object.try(:length) || "short" %>
+        <% lengths.each do |val,label| %>
+          <button type="button" class="length-btn px-3 py-2 text-sm transition focus:outline-none focus:ring-2 focus:ring-accent-orange <%= (current_length == val) ? 'bg-accent-orange text-white' : 'bg-white text-neutral-700 hover:bg-neutral-50' %>" data-value="<%= val %>"><%= label %></button>
+        <% end %>
       </div>
 
-      <div class="w-48">
-        <label for="length" class="block text-sm text-gray-600">Output length</label>
-        <div class="flex items-center gap-2">
-          <select id="length" name="prompt[length]" class="w-full border p-2 rounded" aria-label="Output length">
-            <option value="short" <%= "selected" if ((defined?(@previous_input) && @previous_input && @previous_input[:length]) || f.object.try(:length)) == "short" %>>Short</option>
-            <option value="medium" <%= "selected" if ((defined?(@previous_input) && @previous_input && @previous_input[:length]) || f.object.try(:length)) == "medium" %>>Medium</option>
-            <option value="long" <%= "selected" if ((defined?(@previous_input) && @previous_input && @previous_input[:length]) || f.object.try(:length)) == "long" %>>Long</option>
-          </select>
-        </div>
-      </div>
+      <%= f.hidden_field :length, value: current_length, id: "length-hidden" %>
     </div>
+  </div>
 
-    <div class="flex items-center justify-between">
-      <div class="text-sm text-gray-500">Model: General</div>
-      <div>
-        <%= f.submit (f.object.persisted? ? "Update Prompt" : "Generate Prompt"),
-            class: "px-4 py-2 bg-brand text-white rounded hover:bg-brand/80 transition-colors duration-200 cursor-pointer" %>
-      </div>
+  <!-- Form actions -->
+  <div class="flex items-center justify-between pt-3">
+    <div>
+      <%= f.submit (f.object.persisted? ? "Update Prompt" : "Generate Prompt"),
+          class: "px-4 py-2 bg-accent-orange text-white rounded hover:bg-accent-orange/90 transition-colors duration-200 cursor-pointer" %>
     </div>
-  <% end %>
+  </div>
+  </div>
 <% end %>
 
+<!-- UI Script (initializes visual states + hover interactions) -->
 <script>
-document.addEventListener("turbo:load", function() {
-  // Tone toggling
-  const toneToggle = document.getElementById("toggle-tones");
-  const toneAdvancedWrapper = document.getElementById("tone-advanced-wrapper");
-  const tonePrimary = document.getElementById("tone-primary");
-  const toneAdvanced = document.getElementById("tone-advanced");
+// Guard against multiple initializations when navigating with/without Turbo
+(function initPromptFormUI() {
+  function boot(scope) {
+    if (!scope || scope.dataset.initialized === "true") return;
+    scope.dataset.initialized = "true";
 
-  if (toneToggle) {
-    toneToggle.addEventListener("click", function(e){
-      e.preventDefault();
-      toneAdvancedWrapper.classList.toggle("hidden");
-      this.innerText = toneAdvancedWrapper.classList.contains("hidden") ? "More" : "Less";
-    });
+  // small helper
+  function setHidden(id, value, root) {
+    const el = root.querySelector('#' + id);
+    if (el) el.value = value;
   }
 
-  // Format toggling
-  const formatToggle = document.getElementById("toggle-formats");
-  const formatAdvancedWrapper = document.getElementById("format-advanced-wrapper");
-  const formatPrimary = document.getElementById("format-primary");
-  const formatAdvanced = document.getElementById("format-advanced");
-
-  if (formatToggle) {
-    formatToggle.addEventListener("click", function(e){
-      e.preventDefault();
-      formatAdvancedWrapper.classList.toggle("hidden");
-      this.innerText = formatAdvancedWrapper.classList.contains("hidden") ? "More" : "Less";
-    });
+  // Toggle aria-pressed + visual classes for chips
+  function activateChip(btn, activeClass='bg-accent-orange text-white border-accent-orange') {
+    // deactivate siblings
+    const parent = btn.parentElement;
+    if (parent) {
+      parent.querySelectorAll('button[data-value]').forEach(sib => {
+        sib.classList.remove('bg-accent-orange','text-white','border-accent-orange');
+        sib.classList.add('bg-white','text-neutral-700');
+        sib.setAttribute('aria-pressed','false');
+      });
+    }
+    // activate this
+    btn.classList.remove('bg-white','text-neutral-700');
+    btn.classList.add(...activeClass.split(' '));
+    btn.setAttribute('aria-pressed','true');
   }
 
-  // When advanced options are selected, copy into the visible primary selects (so they submit)
-  function copyAdvancedToPrimary(advancedEl, primaryEl) {
-    advancedEl.addEventListener("change", function() {
-      if (this.value && this.value.length > 0) {
-        // if a value chosen in advanced, set it on primary (and ensure it exists as option)
-        let v = this.value;
-        // ensure primary has an option for value (if not, add it)
-        if (![...primaryEl.options].some(o => o.value === v)) {
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.text = v;
-          primaryEl.appendChild(opt);
-        }
-        primaryEl.value = v;
+  // initialize category chips
+  (function() {
+    const chips = scope.querySelectorAll('.category-chip');
+    const custom = scope.querySelector('#category-custom');
+    const hidden = scope.querySelector('#category-hidden');
+
+    // init from hidden value
+    const initialCat = hidden ? hidden.value : '';
+    if (initialCat) {
+      // if matches a chip, activate
+      let matched = false;
+      chips.forEach(c => { if (c.dataset.value === initialCat) { activateChip(c); matched = true; }});
+      if (!matched && custom) { custom.value = initialCat; }
+    }
+
+    chips.forEach(c => {
+      c.addEventListener('click', () => {
+        activateChip(c);
+        if (custom) custom.value = '';
+        if (hidden) hidden.value = c.dataset.value;
+      });
+      c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); } });
+    });
+
+    if (custom) {
+      custom.addEventListener('input', () => {
+        // clear chips
+        chips.forEach(x => { x.classList.remove('bg-accent-orange','text-white','border-accent-orange'); x.classList.add('bg-white','text-neutral-700'); x.setAttribute('aria-pressed','false'); });
+        if (hidden) hidden.value = custom.value;
+      });
+    }
+  })();
+
+  // role presets + clear
+  (function() {
+    const roleChips = scope.querySelectorAll('.role-chip');
+    const roleClear = scope.querySelector('#role-clear');
+    const roleEl = scope.querySelector('textarea[name="prompt[role]"], input[name="prompt[role]"]');
+
+    roleChips.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (roleEl) { roleEl.focus(); roleEl.value = btn.dataset.role || btn.innerText; roleEl.dispatchEvent(new Event('input', { bubbles: true })); }
+        roleChips.forEach(x => x.setAttribute('aria-pressed','false'));
+        btn.setAttribute('aria-pressed','true');
+      });
+      btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); } });
+    });
+
+    if (roleClear && roleEl) {
+      roleClear.addEventListener('click', () => { roleEl.value = ''; roleEl.dispatchEvent(new Event('input', { bubbles: true })); roleEl.focus(); roleChips.forEach(x => x.setAttribute('aria-pressed','false')); });
+    }
+  })();
+
+  // tone primary chips + more popover
+  (function() {
+    const toneHidden = scope.querySelector('#tone-hidden');
+    const toneChips = scope.querySelectorAll('.tone-chip');
+    const toneMoreToggle = scope.querySelector('#tone-more-toggle');
+    const toneMore = scope.querySelector('#tone-more');
+    const toneMoreItems = scope.querySelectorAll('.tone-more-item');
+    const toneSelectedLabel = scope.querySelector('#tone-selected-label');
+
+    // init from hidden value
+    const initialTone = toneHidden ? toneHidden.value : '';
+    if (initialTone) {
+      let matched = false;
+      toneChips.forEach(c => { if (c.dataset.value === initialTone) { activateChip(c); matched = true; }});
+      // if not matched, show selected label indicating custom tone
+      if (!matched && toneSelectedLabel) {
+        toneSelectedLabel.textContent = "Selected: " + initialTone;
+        toneSelectedLabel.classList.remove('hidden');
       }
+    }
+
+    toneChips.forEach(c => {
+      c.addEventListener('click', () => {
+        activateChip(c);
+        if (toneHidden) toneHidden.value = c.dataset.value;
+        if (toneSelectedLabel) { toneSelectedLabel.classList.add('hidden'); toneSelectedLabel.textContent = ''; }
+      });
+      c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); } });
     });
+
+    if (toneMoreToggle && toneMore) {
+      toneMoreToggle.addEventListener('click', (e) => { e.preventDefault(); toneMore.classList.toggle('hidden'); });
+      document.addEventListener('click', (e) => { if (!toneMore.contains(e.target) && e.target !== toneMoreToggle) toneMore.classList.add('hidden'); });
+    }
+
+    toneMoreItems.forEach(it => {
+      it.addEventListener('click', () => {
+        const v = it.dataset.value || it.innerText;
+        if (toneHidden) toneHidden.value = v;
+        // visually clear primary chips (they no longer represent selection)
+        toneChips.forEach(x => x.classList.remove('bg-accent-orange','text-white','border-accent-orange'));
+        if (toneSelectedLabel) { toneSelectedLabel.textContent = "Selected: " + v; toneSelectedLabel.classList.remove('hidden'); }
+        if (toneMore) toneMore.classList.add('hidden');
+      });
+    });
+  })();
+
+  // format primary chips + more popover
+  (function() {
+    const formatHidden = scope.querySelector('#format-hidden');
+    const formatChips = scope.querySelectorAll('.format-chip');
+    const formatMoreToggle = scope.querySelector('#format-more-toggle');
+    const formatMore = scope.querySelector('#format-more');
+    const formatMoreItems = scope.querySelectorAll('.format-more-item');
+    const formatSelectedLabel = scope.querySelector('#format-selected-label');
+
+    const initialFormat = formatHidden ? formatHidden.value : '';
+    if (initialFormat) {
+      let matched = false;
+      formatChips.forEach(c => { if (c.dataset.value === initialFormat) { activateChip(c); matched = true; }});
+      if (!matched && formatSelectedLabel) {
+        formatSelectedLabel.textContent = "Selected: " + initialFormat;
+        formatSelectedLabel.classList.remove('hidden');
+      }
+    }
+
+    formatChips.forEach(c => {
+      c.addEventListener('click', () => {
+        activateChip(c);
+        if (formatHidden) formatHidden.value = c.dataset.value;
+        if (formatSelectedLabel) { formatSelectedLabel.classList.add('hidden'); formatSelectedLabel.textContent = ''; }
+      });
+      c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); } });
+    });
+
+    if (formatMoreToggle && formatMore) {
+      formatMoreToggle.addEventListener('click', (e) => { e.preventDefault(); formatMore.classList.toggle('hidden'); });
+      document.addEventListener('click', (e) => { if (!formatMore.contains(e.target) && e.target !== formatMoreToggle) formatMore.classList.add('hidden'); });
+    }
+
+    formatMoreItems.forEach(it => {
+      it.addEventListener('click', () => {
+        const v = it.dataset.value || it.innerText;
+        if (formatHidden) formatHidden.value = v;
+        formatChips.forEach(x => x.classList.remove('bg-accent-orange','text-white','border-accent-orange'));
+        if (formatSelectedLabel) { formatSelectedLabel.textContent = "Selected: " + v; formatSelectedLabel.classList.remove('hidden'); }
+        if (formatMore) formatMore.classList.add('hidden');
+      });
+    });
+  })();
+
+  // LENGTH segmented control
+  (function() {
+    const lengthBtns = scope.querySelectorAll('.length-btn');
+    const lengthHidden = scope.querySelector('#length-hidden');
+
+    // init
+    const initialLength = lengthHidden ? lengthHidden.value : null;
+    if (initialLength) {
+      lengthBtns.forEach(b => {
+        if (b.dataset.value === initialLength) { b.classList.add('bg-accent-orange','text-white'); }
+        else { b.classList.remove('bg-accent-orange','text-white'); }
+      });
+    }
+
+    lengthBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        lengthBtns.forEach(x => x.classList.remove('bg-accent-orange','text-white'));
+        btn.classList.add('bg-accent-orange','text-white');
+        if (lengthHidden) lengthHidden.value = btn.dataset.value;
+      });
+    });
+  })();
+  } // boot
+
+  function start() {
+    const scope = document.getElementById('prompt-form-ui');
+    boot(scope);
   }
 
-  if (toneAdvanced && tonePrimary) copyAdvancedToPrimary(toneAdvanced, tonePrimary);
-  if (formatAdvanced && formatPrimary) copyAdvancedToPrimary(formatAdvanced, formatPrimary);
-});
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
+  document.addEventListener('turbo:load', start);
+})();
 </script>

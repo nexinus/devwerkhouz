@@ -1,44 +1,67 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-  <!-- left: empty (sidebar lives in layout) or promotional column -->
-  <div class="hidden lg:block"></div>
+<div class="min-h-[calc(100vh-4rem)] flex items-start justify-center py-12 px-4">
+  <div class="w-full max-w-4xl space-y-6">
 
-  <!-- center: main prompt area -->
-  <div class="lg:col-span-2">
-    <div class="bg-white border rounded-lg shadow p-6">
-      <h1 class="text-2xl font-bold mb-3">The houz for your AI prompt</h1>
-      <p class="text-gray-600 mb-4">Turn your idea into a perfect prompt—fast. Save and reuse prompts like a pro.</p>
+    <!-- Hero / Composer card -->
+    <div class="bg-white border rounded-2xl shadow-lg p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-neutral-900">The houz for your AI prompt</h1>
+          <p class="mt-2 text-neutral-600">Turn your idea into a perfect prompt—fast. Save and reuse prompts like a pro.</p>
+        </div>
+      </div>
 
-      <%= render 'prompts/form' %>
+      <!-- Composer: bigger, centred, pleasing -->
+      <div class="mt-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="hidden lg:block"></div>
 
-      <div id="prompt-result" class="mt-6">
-        <%= turbo_frame_tag "prompt_show" do %>
-          <% if @generated_prompt.present? %>
-            <div class="p-4 bg-gray-50 rounded">
-              <pre class="whitespace-pre-wrap"><%= @generated_prompt %></pre>
-              <div class="mt-3">
-                <button class="copy-btn px-3 py-2 rounded bg-brand text-white" data-text="<%= j @generated_prompt %>">Copy</button>
+          <div class="lg:col-span-2">
+            <div class="space-y-4">
+              <div class="bg-neutral-50 border border-neutral-100 rounded-lg p-4">
+                <%= render 'prompts/form', locals: { compact: false } %>
+              </div>
+
+              <div id="prompt-result" class="mt-1">
+                <%= turbo_frame_tag "prompt_show" do %>
+                  <% if @generated_prompt.present? %>
+                    <div class="p-4 bg-white border rounded-lg shadow-sm">
+                      <pre class="whitespace-pre-wrap text-sm"><%= @generated_prompt %></pre>
+
+                      <div class="mt-3 flex gap-2">
+                        <button class="copy-btn px-3 py-2 rounded bg-accent-orange text-white" data-text="<%= j @generated_prompt %>">Copy</button>
+                        <button class="px-3 py-2 rounded border" onclick="navigator.clipboard.writeText(`<%= j @generated_prompt %>`)">Copy to clipboard</button>
+                        <%= link_to "Save", new_prompt_path(prompt: { idea: @generated_prompt }), class: "px-3 py-2 rounded border" %>
+                      </div>
+                    </div>
+                  <% else %>
+                    <div class="text-sm text-neutral-500">Your generated prompt will appear here.</div>
+                  <% end %>
+                <% end %>
               </div>
             </div>
-          <% else %>
-            <div class="text-sm text-gray-500">Your generated prompt will appear here.</div>
-          <% end %>
-        <% end %>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- how it works -->
-    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="bg-white p-4 rounded shadow">
-        <h4 class="font-semibold">1. Describe</h4>
-        <p class="text-sm text-gray-600">Tell us your idea in plain language.</p>
+    <!-- How it works / benefits -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white p-5 rounded-lg shadow-sm text-center">
+        <div class="text-2xl mb-2">✍️</div>
+        <h4 class="font-semibold">Describe</h4>
+        <p class="text-sm text-neutral-600">Tell us your idea in plain language.</p>
       </div>
-      <div class="bg-white p-4 rounded shadow">
-        <h4 class="font-semibold">2. Generate</h4>
-        <p class="text-sm text-gray-600">We create a concise, model-ready prompt.</p>
+
+      <div class="bg-white p-5 rounded-lg shadow-sm text-center">
+        <div class="text-2xl mb-2">⚡</div>
+        <h4 class="font-semibold">Generate</h4>
+        <p class="text-sm text-neutral-600">We create a concise, model-ready prompt.</p>
       </div>
-      <div class="bg-white p-4 rounded shadow">
-        <h4 class="font-semibold">3. Save</h4>
-        <p class="text-sm text-gray-600">Store prompts in your history for future reuse.</p>
+
+      <div class="bg-white p-5 rounded-lg shadow-sm text-center">
+        <div class="text-2xl mb-2">📁</div>
+        <h4 class="font-semibold">Save</h4>
+        <p class="text-sm text-neutral-600">Store prompts in your history for future reuse.</p>
       </div>
     </div>
   </div>
