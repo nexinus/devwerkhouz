@@ -3,11 +3,24 @@
        class="fixed left-0 bg-white border-r border-neutral-200 w-64 z-40 overflow-hidden flex flex-col"
        style="top:var(--header-height); height:calc(100vh - var(--header-height));">
   <div class="h-full flex flex-col">
-    <!-- TOP: logo + optional package viewer -->
-    <div class="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
+    <!-- TOP: logo + collapse/expand -->
+    <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
       <%= link_to root_path, class: "flex items-center gap-2", aria: { label: "devwerkhouz home" } do %>
         <%= image_tag "logo.png", alt: "devwerkhouz logo", class: "h-10 w-auto object-contain" %>
       <% end %>
+
+      <!-- Collapse/Expand button (aligned right like ChatGPT) -->
+      <button
+        id="sidebarCollapseBtn"
+        aria-label="Collapse sidebar"
+        title="Collapse"
+        class="p-2 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1"
+      >
+        <!-- chevron-left icon -->
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
     </div>
 
     <!-- New prompt button (top) -->
@@ -84,20 +97,6 @@
           <% end %>
         </li>
       </ul>
-
-      <!-- Collapse/Expand button -->
-      <div class="px-2 pt-4 pb-2 border-t border-neutral-100 mt-auto">
-        <button
-          id="sidebarCollapseBtn"
-          aria-label="Collapse sidebar"
-          class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-neutral-600 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-          </svg>
-          <span data-label>Collapse</span>
-        </button>
-      </div>
     </nav>
 
     <%= render 'shared/sidebar_account_row' %>
