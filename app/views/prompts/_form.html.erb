@@ -13,7 +13,7 @@
 <% model = local_assigns[:prompt] || @prompt || Prompt.new %>
 
 <style>
-  /* subtle animated gradient accent used across all step headers */
+  /* subtle animated gradient accent used across all headers */
   @keyframes accent-slide {
     0% { transform: translateX(-8%); opacity: .9; }
     50% { transform: translateX(8%); opacity: 1; }
@@ -23,15 +23,11 @@
     animation: accent-slide 2.6s ease-in-out infinite;
     border-radius: 6px;
   }
-
-  /* fadeInUp (small, performant) */
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .animate-fade-in-up {
-    animation: fadeInUp .6s ease-out both;
-  }
+  .animate-fade-in-up { animation: fadeInUp .6s ease-out both; }
 </style>
 
 <%= form_with model: model, url: prompts_path, scope: :prompt, method: :post, local: false, html: { id: "prompt-form", class: "space-y-6 animate-fade-in-up" } do |f| %>
@@ -44,22 +40,22 @@
           <div class="step-dot w-3 h-3 rounded-full border border-neutral-200 bg-white" data-step-index="<%= i %>" aria-hidden="true"></div>
         <% end %>
       </div>
-      <div id="step-label" class="text-xs text-neutral-500 ml-3" aria-live="polite">Step 1 of 4</div>
+      <div id="step-label" class="text-xs text-neutral-500 ml-3" aria-live="polite">1 of 4</div>
     </div>
 
     <div id="prompt-steps" class="space-y-6">
 
-      <!-- STEP 1 -->
+      <!-- 1. Role / perspective -->
       <section class="p-4 rounded-xl bg-neutral-50 border border-neutral-100" data-step="1" aria-labelledby="step-1-title" tabindex="-1">
         <div class="flex items-start justify-between">
           <div class="flex items-center gap-4">
             <div class="w-16 h-1 animated-accent" style="background: linear-gradient(90deg,#FF7A18,#E65A00)"></div>
             <div>
-              <h3 id="step-1-title" class="text-2xl md:text-3xl font-extrabold text-neutral-900">Step 1 — Role / perspective</h3>
+              <h3 id="step-1-title" class="text-2xl md:text-3xl font-extrabold text-neutral-900">1. Role / perspective</h3>
               <p class="text-sm text-neutral-500 mt-0.5">Make the assistant adopt a persona — this shapes voice & examples.</p>
             </div>
           </div>
-          <div class="text-sm text-neutral-500">Step 1</div>
+          <div class="text-sm text-neutral-500">1.</div>
         </div>
 
         <div class="mt-4">
@@ -83,17 +79,17 @@
         </div>
       </section>
 
-      <!-- STEP 2 -->
+      <!-- 2. Your idea -->
       <section class="p-4 rounded-xl bg-white border border-neutral-100" data-step="2" aria-labelledby="step-2-title" tabindex="-1">
         <div class="flex items-start justify-between">
           <div class="flex items-center gap-4">
             <div class="w-16 h-1 animated-accent" style="background: linear-gradient(90deg,#FF7A18,#E65A00)"></div>
             <div>
-              <h3 id="step-2-title" class="text-2xl md:text-3xl font-extrabold text-neutral-900">Step 2 — Your idea</h3>
+              <h3 id="step-2-title" class="text-2xl md:text-3xl font-extrabold text-neutral-900">2. Your idea</h3>
               <p class="text-sm text-neutral-500 mt-0.5">Describe the goal, audience and constraints.</p>
             </div>
           </div>
-          <div class="text-sm text-neutral-500">Step 2</div>
+          <div class="text-sm text-neutral-500">2.</div>
         </div>
 
         <div class="mt-4">
@@ -103,25 +99,25 @@
                 rows: 6,
                 class: "mt-2 block w-full rounded-lg border border-neutral-200 bg-white p-3 placeholder-neutral-400 focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange transition-shadow",
                 placeholder: "Describe the idea or goal for this prompt" %>
-          <p class="text-xs text-neutral-500 mt-1">Tip: include context, desired length and examples if helpful.</p>
+          <p class="text-xs text-neutral-500 mt-1">Tip: include context, desired examples and constraints.</p>
         </div>
       </section>
 
-      <!-- STEP 3 -->
+      <!-- 3. Category, tone & format -->
       <section class="p-4 rounded-xl bg-neutral-50 border border-neutral-100" data-step="3" aria-labelledby="step-3-title" tabindex="-1">
         <div class="flex items-start justify-between">
           <div class="flex items-center gap-4">
             <div class="w-16 h-1 animated-accent" style="background: linear-gradient(90deg,#FF7A18,#E65A00)"></div>
             <div>
-              <h3 id="step-3-title" class="text-2xl md:text-3xl font-extrabold text-neutral-900">Step 3 — Category, tone & format</h3>
+              <h3 id="step-3-title" class="text-2xl md:text-3xl font-extrabold text-neutral-900">3. Category, tone & format</h3>
               <p class="text-sm text-neutral-500 mt-0.5">Structure the output and categorize it for reuse.</p>
             </div>
           </div>
-          <div class="text-sm text-neutral-500">Step 3</div>
+          <div class="text-sm text-neutral-500">3.</div>
         </div>
 
         <div class="mt-4 space-y-4">
-          <!-- CATEGORY -->
+          <!-- Category -->
           <div>
             <label class="block text-sm font-medium text-neutral-800 mb-2">Category</label>
             <div class="flex flex-wrap gap-2">
@@ -137,7 +133,7 @@
             <%= f.hidden_field :category, value: (defined?(@previous_input) && @previous_input && @previous_input[:category]) || params.dig(:prompt, :category) || f.object.try(:category), id: "category-hidden" %>
           </div>
 
-          <!-- TONE -->
+          <!-- Tone -->
           <div>
             <label class="block text-sm font-medium text-neutral-800 mb-2">Tone</label>
             <div class="flex items-center gap-2 flex-wrap">
@@ -163,7 +159,7 @@
             <%= f.hidden_field :tone, value: (defined?(@previous_input) && @previous_input && @previous_input[:tone]) || params.dig(:prompt, :tone) || f.object.try(:tone), id: "tone-hidden" %>
           </div>
 
-          <!-- FORMAT -->
+          <!-- Format -->
           <div>
             <label class="block text-sm font-medium text-neutral-800 mb-2">Format</label>
             <div class="flex items-center gap-2 flex-wrap">
@@ -191,17 +187,17 @@
         </div>
       </section>
 
-      <!-- STEP 4 -->
+      <!-- 4. Audience & submit -->
       <section class="p-4 rounded-xl bg-white border border-neutral-100" data-step="4" aria-labelledby="step-4-title" tabindex="-1">
         <div class="flex items-start justify-between">
           <div class="flex items-center gap-4">
             <div class="w-16 h-1 animated-accent" style="background: linear-gradient(90deg,#FF7A18,#E65A00)"></div>
             <div>
-              <h3 id="step-4-title" class="text-2xl md:text-3xl font-extrabold text-neutral-900">Step 4 — Audience & output</h3>
-              <p class="text-sm text-neutral-500 mt-0.5">Finalise audience, length and generate.</p>
+              <h3 id="step-4-title" class="text-2xl md:text-3xl font-extrabold text-neutral-900">4. Audience & output</h3>
+              <p class="text-sm text-neutral-500 mt-0.5">Finalise audience and generate the prompt.</p>
             </div>
           </div>
-          <div class="text-sm text-neutral-500">Step 4</div>
+          <div class="text-sm text-neutral-500">4.</div>
         </div>
 
         <div class="mt-4 flex gap-4 items-end">
@@ -213,25 +209,10 @@
               class: "mt-1 block w-full rounded-md border border-neutral-200 p-2 focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange transition" %>
           </div>
 
-          <div class="w-48">
-            <label class="block text-sm font-medium text-neutral-800 mb-2">Output length</label>
-            <div class="inline-flex rounded-md border overflow-hidden" role="tablist" aria-label="Output length">
-              <% lengths = { "short" => "Short", "medium" => "Medium", "long" => "Long" } %>
-              <% current_length = (defined?(@previous_input) && @previous_input && @previous_input[:length]) || params.dig(:prompt, :length) || f.object.try(:length) || "short" %>
-              <% lengths.each do |val,label| %>
-                <button type="button"
-                        class="length-btn px-3 py-2 text-sm transition focus:outline-none focus:ring-2 focus:ring-accent-orange/30 cursor-pointer <%= (current_length == val) ? 'bg-accent-orange text-white' : 'bg-white text-neutral-700 hover:bg-neutral-50' %>"
-                        data-value="<%= val %>"
-                        aria-pressed="<%= (current_length == val) %>"><%= label %></button>
-              <% end %>
-            </div>
-
-            <%= f.hidden_field :length, value: current_length, id: "length-hidden" %>
-          </div>
+          <!-- Output length removed per request -->
         </div>
 
         <div class="mt-6">
-          <!-- Responsive CTA: full width on mobile, centered and constrained on large -->
           <div class="mx-auto w-full max-w-md">
             <%= f.submit (f.object.persisted? ? "Update Prompt" : "Generate Prompt"),
                 class: "w-full px-4 py-3 bg-accent-orange text-white rounded-lg hover:bg-accent-orange/90 transition-colors duration-200 cursor-pointer text-center font-semibold" %>
@@ -239,12 +220,11 @@
         </div>
       </section>
 
-    </div> <!-- end steps container -->
-
+    </div>
   </div>
 <% end %>
 
-<!-- UI Script: chips, length fixes, and scroll-updating progress dots -->
+<!-- UI Script: chips, tone/format popovers, scroll-updating progress dots (length logic removed) -->
 <script>
 (function initPromptFormUI() {
   const root = document.getElementById('prompt-form');
@@ -252,7 +232,6 @@
   if (root.dataset.initialized === 'true') return;
   root.dataset.initialized = 'true';
 
-  // helpers
   const activateVisualChip = (btn) => {
     const parent = btn.parentElement;
     if (parent) parent.querySelectorAll('button[data-value]').forEach(s => {
@@ -407,37 +386,6 @@
     });
   })();
 
-  // LENGTH
-  (function() {
-    const btns = root.querySelectorAll('.length-btn');
-    const hidden = root.querySelector('#length-hidden');
-    const initVal = hidden ? hidden.value : null;
-
-    if (initVal) {
-      btns.forEach(b => {
-        if (b.dataset.value === initVal) {
-          b.classList.add('bg-accent-orange','text-white');
-          b.setAttribute('aria-pressed','true');
-        } else {
-          b.classList.remove('bg-accent-orange','text-white');
-          b.classList.add('bg-white','text-neutral-700');
-          b.setAttribute('aria-pressed','false');
-        }
-      });
-    }
-
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        btns.forEach(x => { x.classList.remove('bg-accent-orange','text-white'); x.classList.add('bg-white','text-neutral-700'); x.setAttribute('aria-pressed','false'); });
-        btn.classList.remove('bg-white','text-neutral-700');
-        btn.classList.add('bg-accent-orange','text-white');
-        btn.setAttribute('aria-pressed','true');
-        if (hidden) hidden.value = btn.dataset.value;
-      });
-      btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); } });
-    });
-  })();
-
   // Progress dots update on scroll — steps are always visible, observer only updates UI
   (function() {
     const steps = Array.from(root.querySelectorAll('[data-step]'));
@@ -447,16 +395,14 @@
     if (!('IntersectionObserver' in window)) return;
 
     const obs = new IntersectionObserver((entries) => {
-      // choose step with largest intersectionRatio
       const visible = entries.filter(e => e.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
       let idx = 0;
       if (visible) idx = steps.indexOf(visible.target);
-      else { // fallback: nearest to top
+      else {
         idx = steps.findIndex(s => s.getBoundingClientRect().top >= 0);
         if (idx === -1) idx = 0;
       }
 
-      // update dots
       dots.forEach((d,i) => {
         if (i === idx) {
           d.classList.add('bg-accent-orange');
@@ -467,12 +413,11 @@
         }
       });
 
-      if (label) label.textContent = `Step ${idx+1} of ${steps.length}`;
+      if (label) label.textContent = `${idx+1} of ${steps.length}`;
     }, { threshold: [0.3, 0.5, 0.8] });
 
     steps.forEach(s => obs.observe(s));
   })();
 
-  // done init
 })();
 </script>
