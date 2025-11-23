@@ -7,7 +7,8 @@ OmniAuth.config.path_prefix = '/users/auth'
 Devise.omniauth_path_prefix = '/users/auth'
 
 # Allow both GET and POST: GET for callbacks from OAuth providers, POST for initiating auth
-OmniAuth.config.allowed_request_methods = [:get, :post]
+# OmniAuth.config.allowed_request_methods = [:get, :post]
+OmniAuth.config.allowed_request_methods = [:post]
 
 # Configure OmniAuth to raise errors in development for better debugging
 OmniAuth.config.failure_raise_out_environments = ['development']
